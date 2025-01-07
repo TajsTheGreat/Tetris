@@ -46,8 +46,6 @@ class Tetris:
         self.score = 0
         self.state = "start"
         self.field = []
-        self.height = 0
-        self.width = 0
         self.x = 100
         self.y = 60
         self.zoom = 20
@@ -55,9 +53,7 @@ class Tetris:
     
         self.height = height
         self.width = width
-        self.field = []
-        self.score = 0
-        self.state = "start"
+    
         for i in range(height):
             new_line = []
             for j in range(width):
@@ -91,7 +87,14 @@ class Tetris:
                 for i1 in range(i, 1, -1):
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
-        self.score += lines ** 2
+        if lines == 1:
+            self.score += 40
+        elif lines == 2:
+            self.score += 100
+        elif lines == 3:
+            self.score += 300
+        elif lines == 4:
+            self.score += 1200
 
     def go_space(self):
         while not self.intersects():
@@ -157,7 +160,7 @@ while not done:
     if counter > 100000:
         counter = 0
 
-    if counter % (fps // game.level // 2) == 0 or pressing_down:
+    if counter % (fps // game.level) == 0 or pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
         if game.state == "start":
             game.go_down()
 
@@ -184,6 +187,7 @@ while not done:
 
     screen.fill(WHITE)
 
+    # Draw the grid
     for i in range(game.height):
         for j in range(game.width):
             pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
@@ -191,6 +195,7 @@ while not done:
                 pygame.draw.rect(screen, colors[game.field[i][j]],
                                  [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
 
+    # Draw the current figure
     if game.figure is not None:
         for i in range(4):
             for j in range(4):
