@@ -3,8 +3,9 @@ import random
 
 # colors for each tetrimino 
 colors = [
-    (255, 0, 0), # red
+    (255, 255, 255), # white
     (0, 215, 0), # green
+    (255, 0, 0), # red 
     (0, 0, 255), # blue
     (255, 120, 0), # orange
     (255, 255, 0), # yellow
@@ -32,7 +33,7 @@ class Piece:
         self.x = x
         self.y = y
         self.type = random.randint(0, len(self.pieces) - 1)
-        self.color = random.randint(0, len(colors) - 1)
+        self.color = random.randint(1, len(colors) - 1)
         self.rotation = 0
 
     def image(self):
@@ -51,6 +52,7 @@ class Tetris:
         self.y = 60
         self.zoom = 20
         self.piece= None
+        self.next_piece = None
     
         self.height = height
         self.width = width
@@ -60,10 +62,15 @@ class Tetris:
             for j in range(width):
                 new_line.append(0)
             self.field.append(new_line)
+        
+    # Loads the next tetrimino
+    def next_new_piece(self):
+        self.next_piece = Piece(3, 0)
 
     # creates a new tetrimino at the top middle
     def new_piece(self):
-        self.piece = Piece(3, 0)
+        self.piece = self.next_piece
+        self.next_new_piece()
 
     def intersects(self):
         intersection = False
@@ -201,7 +208,7 @@ while not done:
             if event.key == pygame.K_RIGHT:
                 pressing_right = False
 
-    screen.fill(WHITE)
+    screen.fill(BLACK)
 
     # Draw the grid
     for i in range(game.height):
@@ -221,10 +228,21 @@ while not done:
                                      [game.x + game.zoom * (j + game.piece.x) + 1,
                                       game.y + game.zoom * (i + game.piece.y) + 1,
                                       game.zoom - 2, game.zoom - 2])
+    
+    # Draw the next piece
+    if game.next_piece is not None:
+        for i in range(4):
+            for j in range(4):
+                p = i * 4 + j
+                if p in game.next_piece.image():
+                    pygame.draw.rect(screen, colors[game.next_piece.color],
+                                     [80 + game.zoom * (j + 12) + 1,
+                                      80 + game.zoom * (i + 2) + 1,
+                                      game.zoom - 2, game.zoom - 2])
 
-    font = pygame.font.SysFont('Calibri', 25, True, False)
-    font1 = pygame.font.SysFont('Calibri', 65, True, False)
-    text = font.render("Score: " + str(game.score), True, BLACK)
+    font = pygame.font.SysFont('Comic Sans', 25, True, False)
+    font1 = pygame.font.SysFont('Comic Sans', 65, True, False)
+    text = font.render("Score: " + str(game.score), True, WHITE)
     text_game_over = font1.render("Game Over", True, (255, 125, 0))
     text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
 
@@ -237,7 +255,3 @@ while not done:
     clock.tick(fps)
 
 pygame.quit()
-
-
-# jeg er den bedste
-i = 2
