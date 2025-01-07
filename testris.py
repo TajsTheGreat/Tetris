@@ -42,7 +42,6 @@ class Figure:
 
 class Tetris:
     def __init__(self, height, width):
-        self.level = 2
         self.score = 0
         self.state = "start"
         self.field = []
@@ -160,7 +159,7 @@ while not done:
     if counter > 100000:
         counter = 0
 
-    if counter % (fps // game.level) == 0 or pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
+    if counter % (fps // 2) == 0 or pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
         if game.state == "start":
             game.go_down()
 
