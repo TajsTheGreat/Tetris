@@ -53,9 +53,11 @@ class Tetris:
         self.zoom = 20
         self.piece= None
         self.next_piece = None
+        self.reserved_piece = None
     
         self.height = height
         self.width = width
+        self.heights = [0] * width
     
         for i in range(height):
             new_line = []
@@ -71,6 +73,15 @@ class Tetris:
     def new_piece(self):
         self.piece = self.next_piece
         self.next_new_piece()
+    
+    def reserve_piece(self):
+        if self.reserve_piece is not None:
+            temp = self.piece
+            self.piece = self.reserved_piece
+            self.reserved_piece = temp
+        else:
+            self.reserved_piece = self.piece
+            self.new_piece()
 
     def intersects(self):
         intersection = False
@@ -84,6 +95,7 @@ class Tetris:
                         intersection = True
         return intersection
 
+    # checks if lines are full and clears them if they are
     def break_lines(self):
         lines = 0
         for i in range(1, self.height):
@@ -93,9 +105,9 @@ class Tetris:
                     zeros += 1
             if zeros == 0:
                 lines += 1
-                for i1 in range(i, 1, -1):
+                for k in range(i, 1, -1):
                     for j in range(self.width):
-                        self.field[i1][j] = self.field[i1 - 1][j]
+                        self.field[k][j] = self.field[k - 1][j]
         
         # score system based on actual tetris rules
         if lines == 1:
@@ -107,18 +119,30 @@ class Tetris:
         elif lines == 4:
             self.score += 1200
 
+    # fast drops pieces
     def go_space(self):
         while not self.intersects():
             self.piece.y += 1
         self.piece.y -= 1
         self.freeze()
 
+    # makes pieces go down faster
     def go_down(self):
         self.piece.y += 1
         if self.intersects():
             self.piece.y -= 1
             self.freeze()
+    
+    # measures the height of the field
+    def height_measure(self):
+        for j in range(self.width):
+            for i in range(self.height):
+                if self.field[i][j] > 0:
+                    self.heights[j] = self.height - i
+                    break
+        print(self.heights)
 
+    # freezes the piece in place
     def freeze(self):
         for i in range(4):
             for j in range(4):
@@ -127,14 +151,17 @@ class Tetris:
         self.break_lines()
         self.new_piece()
         if self.intersects():
-            self.state = "gameover"
+            self.state = "gameover"   
+        self.height_measure()
 
+    # moves the piece left or right
     def go_side(self, dx):
         old_x = self.piece.x
         self.piece.x += dx
         if self.intersects():
             self.piece.x = old_x
 
+    # rotates the piece
     def rotate(self):
         old_rotation = self.piece.rotation
         self.piece.rotate()
@@ -145,17 +172,18 @@ class Tetris:
 # Initialize the game engine
 pygame.init()
 
-# Define some colors
+# Define colors for screenfill and text fond
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 
+# screen size
 size = (400, 500)
 screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption("Tetris")
 
-# Loop until the user clicks the close button.
+# Loop until the player hits the close button.
 done = False
 clock = pygame.time.Clock()
 fps = 50
@@ -183,6 +211,7 @@ while not done:
     if pressing_right:
         game.go_side(1)
 
+    # controls
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -199,6 +228,8 @@ while not done:
                 game.go_space()
             if event.key == pygame.K_ESCAPE:
                 game.__init__(20, 10)
+            if event.key == pygame.K_x:
+                game.reserve_piece()
 
     if event.type == pygame.KEYUP:
             if event.key == pygame.K_DOWN:
@@ -208,6 +239,7 @@ while not done:
             if event.key == pygame.K_RIGHT:
                 pressing_right = False
 
+    # background color
     screen.fill(BLACK)
 
     # Draw the grid
@@ -236,20 +268,37 @@ while not done:
                 p = i * 4 + j
                 if p in game.next_piece.image():
                     pygame.draw.rect(screen, colors[game.next_piece.color],
-                                     [80 + game.zoom * (j + 12) + 1,
-                                      80 + game.zoom * (i + 2) + 1,
+                                     [70 + game.zoom * (j + 12) + 1,
+                                      60 + game.zoom * (i + 2) + 1,
                                       game.zoom - 2, game.zoom - 2])
+        pygame.draw.rect(screen, WHITE, [70 + game.zoom * 12, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
+    
+    # Draw the reserved piece
+    if game.reserved_piece is not None:
+        for i in range(4):
+            for j in range(4):
+                p = i * 4 + j
+                if p in game.reserved_piece.image():
+                    pygame.draw.rect(screen, colors[game.reserved_piece.color],
+                                     [-30 + game.zoom * (j + 2) + 1,
+                                      60 + game.zoom * (i + 2) + 1,
+                                      game.zoom - 2, game.zoom - 2])
+        pygame.draw.rect(screen, WHITE, [-30 + game.zoom * 2, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
 
     font = pygame.font.SysFont('Comic Sans', 25, True, False)
     font1 = pygame.font.SysFont('Comic Sans', 65, True, False)
     text = font.render("Score: " + str(game.score), True, WHITE)
+    next_text = font.render("Next:", True, WHITE)
+    reserved_text = font.render("Reserved:", True, WHITE)
     text_game_over = font1.render("Game Over", True, (255, 125, 0))
-    text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
+    text_restart = font1.render("Press ESC", True, (255, 215, 0))
 
     screen.blit(text, [0, 0])
+    screen.blit(next_text, [315, 25])
+    screen.blit(reserved_text, [0, 25])
     if game.state == "gameover":
         screen.blit(text_game_over, [20, 200])
-        screen.blit(text_game_over1, [25, 265])
+        screen.blit(text_restart, [25, 265])
 
     pygame.display.flip()
     clock.tick(fps)
