@@ -239,3 +239,5 @@ while not done:
 pygame.quit()
 
 
+# jeg er den bedste
+i = 2
