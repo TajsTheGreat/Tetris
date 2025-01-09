@@ -47,6 +47,14 @@ while not exit_program:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_DOWN:
                 pressing_down = False
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                x = 0
+            if event.key == pygame.K_SPACE:
+                space = False
+            if event.key == pygame.K_x:
+                reserve = False
+            if event.key == pygame.K_UP:
+                rotate = False
     
     action = x, down, rotate, space, reserve
     action = env.step(action)

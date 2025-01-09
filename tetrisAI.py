@@ -1,36 +1,52 @@
 from agent import Agent
-from selfmadetetris import Board
+from selfmadetetrisAI import Board
 import pygame
+import threading
 
 env = Board()
 env.reset()
 exit_program = False
-while not exit_program:
-    env.render()
+input_value = []
+env.render()
 
-    # Process game events
+clock = pygame.time.Clock()
+fps = 50
+input_text = ""
+active = True
+
+def get_input():
+    global input_text
+    global active
+    input_text = input("Enter: ")
+    active = False
+    print("Input received")
+
+input_thread = threading.Thread(target=get_input)
+input_thread.start()
+
+while not exit_program:
+
+
+    if not active:
+        active = True
+        input_value.append(int(input_text))
+        input_text = ""
+        input_thread = threading.Thread(target=get_input)
+        input_thread.start()
+        if len(input_value) > 1:
+            env.step(input_value)
+            input_value = []
+            env.render()
+    
+    # controls
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit_program = True
-        if event.type == pygame.KEYDOWN:
-            if event.key in [pygame.K_ESCAPE, pygame.K_q]:
-                exit_program = True
-            if event.key == pygame.K_UP:
-                boost = True
-            if event.key == pygame.K_DOWN:
-                boost = False
-            if event.key == pygame.K_RIGHT:
-                left = False if right else True
-                right = False
-            if event.key == pygame.K_LEFT:
-                right = False if left else True
-                left = False
-            if event.key == pygame.K_r:
-                boost = False        
-                left = False
-                right = False
-                env.reset()
-            if event.key == pygame.K_q:
-                exit_program = True
+    
+
+    
+    # Update the display (even if it's just a blank screen)
+    pygame.display.flip()
+    clock.tick(fps)
 
 env.close()

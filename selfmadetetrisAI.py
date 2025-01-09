@@ -37,7 +37,7 @@ class Piece:
         self.rotation = 0
 
     def image(self):
-        return self.pieces[self.type][self.rotation]
+        return self.pieces[self.type][self.rotation % len(self.pieces[self.type])]
 
     def rotate(self):
         self.rotation = (self.rotation + 1) % len(self.pieces[self.type])
@@ -148,6 +148,7 @@ class Tetris:
             for j in range(4):
                 if i * 4 + j in self.piece.image():
                     self.field[i + self.piece.y][j + self.piece.x] = self.piece.color
+
         self.break_lines()
         self.new_piece()
         if self.intersects():
@@ -167,6 +168,18 @@ class Tetris:
         self.piece.rotate()
         if self.intersects():
             self.piece.rotation = old_rotation
+    
+    def place(self, firstvalue, secondvalue):
+        self.piece.rotation = secondvalue
+        while not self.intersects():
+            if 0 < (firstvalue - self.piece.x):
+                self.piece.x += 1
+            elif 0 > (firstvalue - self.piece.x):
+                self.piece.x -= 1
+            if self.piece.x == firstvalue:
+                break
+            print(self.piece.x)
+        self.go_space()
     
     # resets the game
     def reset(self):
@@ -239,31 +252,17 @@ class Board():
         self.won = False
         self.game.reset()
     
-    def step(self, action):
+    def step(self, value):
         # step the game
-        x, down, rotate, space, reserve = action
-        self.pressing_down = down
-        if down:
-            self.game.go_down()
-        if x < 0 or x > 0:
-            self.game.go_side(x)
-        if rotate:
-            self.game.rotate()
-        if space:
-            self.game.go_space()
-        if reserve:
-            self.game.reserve_piece()
-        return 0, down, False, False, False
+        firstvalue = value[0]
+        secondvalue = value[1]
+        self.game.place(firstvalue, secondvalue)
 
         
     
-    def render(self, counter):
+    def render(self):
         if self.game.state == "start" and self.game.piece is None:
             self.game.new_piece()
-
-        if counter % (50 // 2) == 0 or self.pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
-            if self.game.state == "start":
-                self.game.go_down()
         
         # background color
         self.screen.fill(self.BLACK)
