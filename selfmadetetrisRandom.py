@@ -173,14 +173,13 @@ class Tetris:
             self.piece.rotation = old_rotation
     
     def place(self, firstvalue, secondvalue):
-        print(self.state)
-        self.piece.specific_rotate(firstvalue)
+        self.piece.specific_rotate(secondvalue)
         while not self.intersects():
-            if 0 < (secondvalue - self.piece.x):
+            if 0 < (firstvalue - self.piece.x):
                 self.piece.x += 1
-            elif 0 > (secondvalue - self.piece.x):
+            elif 0 > (firstvalue - self.piece.x):
                 self.piece.x -= 1
-            if self.piece.x == secondvalue:
+            if self.piece.x == firstvalue:
                 break
         if self.intersects():
             if self.piece.x > 0:
@@ -215,10 +214,6 @@ class Tetris:
     
     def get_piece(self):
         arr = []
-        if self.piece is None:
-            for i in range(7):
-                arr.append(0)
-            return arr
         for i in range(7):
             arr.append(1 if self.piece.type == i else 0)
         return arr
@@ -270,17 +265,10 @@ class Board():
         self.game.reset()
     
     def step(self, value):
-        if self.game.state == "gameover":
-            temp = []
-            for i in range(len(self.game.heights)):
-                temp.append(self.game.heights[i])
-            for i in range(7):
-                temp.append(0)
-            return tuple(temp), 0, True
         score = self.game.score
-        # firstvalue is the rotation of the piece and secondvalue is the x value of the piece
-        firstvalue = int(str(value)[0]) if value > 9 else 0
-        secondvalue = int(str(value)[1]) if value > 9 else value
+        # step the game
+        firstvalue = value[0]
+        secondvalue = value[1]
         self.game.place(firstvalue, secondvalue)
         return self.get_state(), self.game.score - score, False if self.game.state == "start" else True
     

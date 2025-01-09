@@ -1,52 +1,48 @@
 from agent import Agent
 from selfmadetetrisAI import Board
 import pygame
-import threading
+from time import sleep
 
 env = Board()
 env.reset()
 exit_program = False
-input_value = []
 env.render()
 
-clock = pygame.time.Clock()
-fps = 50
-input_text = ""
 active = True
 
-def get_input():
-    global input_text
-    global active
-    input_text = input("Enter: ")
-    active = False
-    print("Input received")
-
-input_thread = threading.Thread(target=get_input)
-input_thread.start()
+theBrain = Agent("first", 0.99, 1, 0.001, [17], 40, 150)
 
 while not exit_program:
 
+    done = False
 
-    if not active:
-        active = True
-        input_value.append(int(input_text))
-        input_text = ""
-        input_thread = threading.Thread(target=get_input)
-        input_thread.start()
-        if len(input_value) > 1:
-            env.step(input_value)
-            input_value = []
-            env.render()
-    
-    # controls
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            exit_program = True
-    
+    while not done:
 
-    
-    # Update the display (even if it's just a blank screen)
-    pygame.display.flip()
-    clock.tick(fps)
+        # controls
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit_program = True
+                done = True
+        
+        # Observes the current state of the environment
+        obs = env.get_state()
+        
+        # Chooses an action based on the current state
+        action = theBrain.act(obs)
+
+        env.render()
+        
+        # Takes the action and observes the new state, reward, and whether the game is done
+        obs_, reward, done = env.step(action)
+
+        # Updates the batch with the new experience
+        theBrain.updateBatch(obs, action, reward, obs_, done)
+
+
+        # Learns from the batch of experiences and updates the model
+        theBrain.experience()
+        sleep(0.5)
+
+    env.reset()
 
 env.close()

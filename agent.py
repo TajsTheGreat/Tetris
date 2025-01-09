@@ -11,7 +11,7 @@ H = 250
 class Model(torch.nn.Module):
     def __init__(self, input_dim, output_dim):
         super(Model, self).__init__()
-        self.fc1 = nn.Linear(input_dim, H)
+        self.fc1 = nn.Linear(*input_dim, H)
         self.fc2 = nn.Linear(H, H)
         self.fc3 = nn.Linear(H, output_dim)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -49,18 +49,18 @@ class Agent():
         self.new_state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
         self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
-        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=np.bool)
+        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=np.bool_)
     
     def act(self, obs):    
         if random.uniform(0, 1) < self.epsilon:
-            return random.randint(0, 3)
+            return random.randint(0, 39)
         else:
             state = torch.tensor([obs]).to(self.model.device)
             actions = self.model.forward(state)
             return torch.argmax(actions).item()
     
     # this stores the experience in the batch
-    def updateBatch(self, state, new_state, action, reward, done):
+    def updateBatch(self, state, action, reward, new_state, done):
         i = self.index % self.batchMaxLength
         self.state_mem[i] = state
         self.new_state_mem[i] = new_state
