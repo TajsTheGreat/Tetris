@@ -41,8 +41,9 @@ while not exit_program:
 
         # Learns from the batch of experiences and updates the model
         theBrain.experience()
-        sleep(0.5)
 
+    print(f"Score: {env.game.score}")
+    sleep(0.5)
     env.reset()
 
 env.close()

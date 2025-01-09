@@ -143,7 +143,6 @@ class Tetris:
                 if self.field[i][j] > 0:
                     self.heights[j] = self.height - i
                     break
-        print(self.heights)
 
     # freezes the piece in place
     def freeze(self):
@@ -173,7 +172,6 @@ class Tetris:
             self.piece.rotation = old_rotation
     
     def place(self, firstvalue, secondvalue):
-        print(self.state)
         self.piece.specific_rotate(firstvalue)
         while not self.intersects():
             if 0 < (secondvalue - self.piece.x):

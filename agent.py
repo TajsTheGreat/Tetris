@@ -9,13 +9,16 @@ from collections import deque
 H = 250
 
 class Model(torch.nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim, output_dim, lr=0.01):
         super(Model, self).__init__()
         self.fc1 = nn.Linear(*input_dim, H)
         self.fc2 = nn.Linear(H, H)
         self.fc3 = nn.Linear(H, output_dim)
+
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.loss_function = nn.MSELoss() # if not working add reduction='sum'
+        self.to(self.device)
     
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -41,8 +44,7 @@ class Agent():
         self.samplesize = samplesize
         self.index = 0
 
-        self.model = Model(input_dim, output_dim)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
+        self.model = Model(input_dim, output_dim, lr=lr)
         self.weightPath = f"Models/{self.id}.pt"
 
         self.state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
@@ -99,8 +101,8 @@ class Agent():
 
         q_reward = reward_batch + self.gamma * torch.max(q_values_next, dim=1)[0]
 
-        loss = self.model.loss_function(q_reward, q_values).to(self.model.device)
-        loss.backward()
+        loss_funtion = self.model.loss_function(q_reward, q_values).to(self.model.device)
+        loss_funtion.backward()
         self.model.optimizer.step()
 
     # this loads the weights of the model
@@ -108,7 +110,7 @@ class Agent():
         try:
             checkpoint = torch.load(self.weightPath)
             self.model.load_state_dict(checkpoint['model_state_dict'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.model.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         except:
             pass
 
