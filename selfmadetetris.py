@@ -205,6 +205,7 @@ class Tetris:
         self.new_piece()
         self.next_new_piece()
         self.height_measure()
+        print("her")
 
 class Board():
     # colors for each tetrimino 
@@ -219,9 +220,6 @@ class Board():
         (102, 255, 255), # cyan
     ]
 
-    # Rendering?
-    rendering = False
-
     def __init__(self):
         pygame.init()
         # Set up game
@@ -234,8 +232,8 @@ class Board():
         self.GRAY = (128, 128, 128)
 
         # screen size
-        size = (400, 500)
-        screen = pygame.display.set_mode(size)
+        self.size = (400, 500)
+        self.screen = pygame.display.set_mode(self.size)
 
         pygame.display.set_caption("Tetris")
 
@@ -246,7 +244,8 @@ class Board():
         self.pressing_down = False
 
         # background color
-        screen.fill(BLACK)
+        self.screen.fill(self.BLACK)
+        self.pressing_down = False
     
     def reset(self):
         # Program status
@@ -257,67 +256,81 @@ class Board():
     def step(self, action):
         # step the game
         self.game.step(action)
+        x, down, rotate, space, reserve = action
+        self.pressing_down = down
+        print("here")
+        return 0, down, False, False, False
 
         
     
-    def render(self):
+    def render(self, counter):
+        if self.game.state == "start" and self.game.piece is None:
+            self.game.new_piece()
+
+        if counter % (50 // 2) == 0 or self.pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
+            if self.game.state == "start":
+                self.game.go_down()
+        
+        # background color
+        self.screen.fill(self.BLACK)
+            
         # Draw the grid
-        for i in range(game.height):
-            for j in range(game.width):
-                pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
-                if game.field[i][j] > 0:
-                    pygame.draw.rect(screen, colors[game.field[i][j]],
-                                    [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
+        for i in range(self.game.height):
+            for j in range(self.game.width):
+                pygame.draw.rect(self.screen, self.GRAY, [self.game.x + self.game.zoom * j, self.game.y + self.game.zoom * i, self.game.zoom, self.game.zoom], 1)
+                if self.game.field[i][j] > 0:
+                    pygame.draw.rect(self.screen, colors[self.game.field[i][j]],
+                                    [self.game.x + self.game.zoom * j + 1, self.game.y + self.game.zoom * i + 1, self.game.zoom - 2, self.game.zoom - 1])
 
         # Draw the current piece
-        if game.piece is not None:
+        if self.game.piece is not None:
             for i in range(4):
                 for j in range(4):
                     p = i * 4 + j
-                    if p in game.piece.image():
-                        pygame.draw.rect(screen, colors[game.piece.color],
-                                        [game.x + game.zoom * (j + game.piece.x) + 1,
-                                        game.y + game.zoom * (i + game.piece.y) + 1,
-                                        game.zoom - 2, game.zoom - 2])
+                    if p in self.game.piece.image():
+                        pygame.draw.rect(self.screen, colors[self.game.piece.color],
+                                        [self.game.x + self.game.zoom * (j + self.game.piece.x) + 1,
+                                        self.game.y + self.game.zoom * (i + self.game.piece.y) + 1,
+                                        self.game.zoom - 2, self.game.zoom - 2])
         
         # Draw the next piece
-        if game.next_piece is not None:
+        if self.game.next_piece is not None:
             for i in range(4):
                 for j in range(4):
                     p = i * 4 + j
-                    if p in game.next_piece.image():
-                        pygame.draw.rect(screen, colors[game.next_piece.color],
-                                        [70 + game.zoom * (j + 12) + 1,
-                                        60 + game.zoom * (i + 2) + 1,
-                                        game.zoom - 2, game.zoom - 2])
-            pygame.draw.rect(screen, WHITE, [70 + game.zoom * 12, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
+                    if p in self.game.next_piece.image():
+                        pygame.draw.rect(self.screen, colors[self.game.next_piece.color],
+                                        [70 + self.game.zoom * (j + 12) + 1,
+                                        60 + self.game.zoom * (i + 2) + 1,
+                                        self.game.zoom - 2, self.game.zoom - 2])
+            pygame.draw.rect(self.screen, self.WHITE, [70 + self.game.zoom * 12, 60 + self.game.zoom * 2, self.game.zoom * 4, self.game.zoom * 4], 1)
         
         # Draw the reserved piece
-        if game.reserved_piece is not None:
+        if self.game.reserved_piece is not None:
             for i in range(4):
                 for j in range(4):
                     p = i * 4 + j
-                    if p in game.reserved_piece.image():
-                        pygame.draw.rect(screen, colors[game.reserved_piece.color],
-                                        [-30 + game.zoom * (j + 2) + 1,
-                                        60 + game.zoom * (i + 2) + 1,
-                                        game.zoom - 2, game.zoom - 2])
-            pygame.draw.rect(screen, WHITE, [-30 + game.zoom * 2, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
+                    if p in self.game.reserved_piece.image():
+                        pygame.draw.rect(self.screen, colors[self.game.reserved_piece.color],
+                                        [-30 + self.game.zoom * (j + 2) + 1,
+                                        60 + self.game.zoom * (i + 2) + 1,
+                                        self.game.zoom - 2, self.game.zoom - 2])
+            pygame.draw.rect(self.screen, self.WHITE, [-30 + self.game.zoom * 2, 60 + self.game.zoom * 2, self.game.zoom * 4, self.game.zoom * 4], 1)
 
         font = pygame.font.SysFont('Comic Sans', 25, True, False)
         font1 = pygame.font.SysFont('Comic Sans', 65, True, False)
-        text = font.render("Score: " + str(game.score), True, WHITE)
-        next_text = font.render("Next:", True, WHITE)
-        reserved_text = font.render("Reserved:", True, WHITE)
+        text = font.render("Score: " + str(self.game.score), True, self.WHITE)
+        next_text = font.render("Next:", True, self.WHITE)
+        reserved_text = font.render("Reserved:", True, self.WHITE)
         text_game_over = font1.render("Game Over", True, (255, 125, 0))
         text_restart = font1.render("Press ESC", True, (255, 215, 0))
 
-        screen.blit(text, [0, 0])
-        screen.blit(next_text, [315, 25])
-        screen.blit(reserved_text, [0, 25])
-        if game.state == "gameover":
-            screen.blit(text_game_over, [20, 200])
-            screen.blit(text_restart, [25, 265])
+        self.screen.blit(text, [0, 0])
+        self.screen.blit(next_text, [315, 25])
+        self.screen.blit(reserved_text, [0, 25])
+        if self.game.state == "gameover":
+            self.screen.blit(text_game_over, [20, 200])
+            self.screen.blit(text_restart, [25, 265])
         pygame.display.flip()
     
     # Close the game
@@ -326,126 +339,126 @@ class Board():
         
 
 
-# Initialize the game engine
-pygame.init()
+# # Initialize the game engine
+# pygame.init()
 
-# Define colors for screenfill and text fond
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GRAY = (128, 128, 128)
+# # Define colors for screenfill and text fond
+# BLACK = (0, 0, 0)
+# WHITE = (255, 255, 255)
+# GRAY = (128, 128, 128)
 
-# screen size
-size = (400, 500)
-screen = pygame.display.set_mode(size)
+# # screen size
+# size = (400, 500)
+# screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("Tetris")
+# pygame.display.set_caption("Tetris")
 
-# Loop until the player hits the close button.
-done = False
-clock = pygame.time.Clock()
-fps = 50
-game = Tetris(20, 10)
-counter = 0
+# # Loop until the player hits the close button.
+# done = False
+# clock = pygame.time.Clock()
+# fps = 50
+# game = Tetris(20, 10)
+# counter = 0
 
-pressing_down = False
+# pressing_down = False
 
-while not done:
-    if game.piece is None:
-        game.new_piece()
-    counter += 1
-    if counter > 100000:
-        counter = 0
+# while not done:
+#     if game.piece is None:
+#         game.new_piece()
+#     counter += 1
+#     if counter > 100000:
+#         counter = 0
 
-    if counter % (fps // 2) == 0 or pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
-        if game.state == "start":
-            game.go_down()
+#     if counter % (fps // 2) == 0 or pressing_down: # if code fucks up, change back to (fps // game.level // 2) == 0:
+#         if game.state == "start":
+#             game.go_down()
 
-    # controls
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                game.rotate()
-            if event.key == pygame.K_DOWN:
-                pressing_down = True
-            if event.key == pygame.K_LEFT:
-                game.go_side(-1)
-            if event.key == pygame.K_RIGHT:
-                game.go_side(1)
-            if event.key == pygame.K_SPACE:
-                game.go_space()
-            if event.key == pygame.K_ESCAPE:
-                game.__init__(20, 10)
-            if event.key == pygame.K_x:
-                game.reserve_piece()
+#     # controls
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             done = True
+#         if event.type == pygame.KEYDOWN:
+#             if event.key == pygame.K_UP:
+#                 game.rotate()
+#             if event.key == pygame.K_DOWN:
+#                 pressing_down = True
+#             if event.key == pygame.K_LEFT:
+#                 game.go_side(-1)
+#             if event.key == pygame.K_RIGHT:
+#                 game.go_side(1)
+#             if event.key == pygame.K_SPACE:
+#                 game.go_space()
+#             if event.key == pygame.K_ESCAPE:
+#                 game.__init__(20, 10)
+#             if event.key == pygame.K_x:
+#                 game.reserve_piece()
 
-    if event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
+#     if event.type == pygame.KEYUP:
+#             if event.key == pygame.K_DOWN:
+#                 pressing_down = False
 
-    # background color
-    screen.fill(BLACK)
+#     # background color
+#     screen.fill(BLACK)
 
-    # Draw the grid
-    for i in range(game.height):
-        for j in range(game.width):
-            pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
-            if game.field[i][j] > 0:
-                pygame.draw.rect(screen, colors[game.field[i][j]],
-                                 [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
+#     # Draw the grid
+#     for i in range(game.height):
+#         for j in range(game.width):
+#             pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
+#             if game.field[i][j] > 0:
+#                 pygame.draw.rect(screen, colors[game.field[i][j]],
+#                                  [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
 
-    # Draw the current piece
-    if game.piece is not None:
-        for i in range(4):
-            for j in range(4):
-                p = i * 4 + j
-                if p in game.piece.image():
-                    pygame.draw.rect(screen, colors[game.piece.color],
-                                     [game.x + game.zoom * (j + game.piece.x) + 1,
-                                      game.y + game.zoom * (i + game.piece.y) + 1,
-                                      game.zoom - 2, game.zoom - 2])
+#     # Draw the current piece
+#     if game.piece is not None:
+#         for i in range(4):
+#             for j in range(4):
+#                 p = i * 4 + j
+#                 if p in game.piece.image():
+#                     pygame.draw.rect(screen, colors[game.piece.color],
+#                                      [game.x + game.zoom * (j + game.piece.x) + 1,
+#                                       game.y + game.zoom * (i + game.piece.y) + 1,
+#                                       game.zoom - 2, game.zoom - 2])
     
-    # Draw the next piece
-    if game.next_piece is not None:
-        for i in range(4):
-            for j in range(4):
-                p = i * 4 + j
-                if p in game.next_piece.image():
-                    pygame.draw.rect(screen, colors[game.next_piece.color],
-                                     [70 + game.zoom * (j + 12) + 1,
-                                      60 + game.zoom * (i + 2) + 1,
-                                      game.zoom - 2, game.zoom - 2])
-        pygame.draw.rect(screen, WHITE, [70 + game.zoom * 12, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
+#     # Draw the next piece
+#     if game.next_piece is not None:
+#         for i in range(4):
+#             for j in range(4):
+#                 p = i * 4 + j
+#                 if p in game.next_piece.image():
+#                     pygame.draw.rect(screen, colors[game.next_piece.color],
+#                                      [70 + game.zoom * (j + 12) + 1,
+#                                       60 + game.zoom * (i + 2) + 1,
+#                                       game.zoom - 2, game.zoom - 2])
+#         pygame.draw.rect(screen, WHITE, [70 + game.zoom * 12, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
     
-    # Draw the reserved piece
-    if game.reserved_piece is not None:
-        for i in range(4):
-            for j in range(4):
-                p = i * 4 + j
-                if p in game.reserved_piece.image():
-                    pygame.draw.rect(screen, colors[game.reserved_piece.color],
-                                     [-30 + game.zoom * (j + 2) + 1,
-                                      60 + game.zoom * (i + 2) + 1,
-                                      game.zoom - 2, game.zoom - 2])
-        pygame.draw.rect(screen, WHITE, [-30 + game.zoom * 2, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
+#     # Draw the reserved piece
+#     if game.reserved_piece is not None:
+#         for i in range(4):
+#             for j in range(4):
+#                 p = i * 4 + j
+#                 if p in game.reserved_piece.image():
+#                     pygame.draw.rect(screen, colors[game.reserved_piece.color],
+#                                      [-30 + game.zoom * (j + 2) + 1,
+#                                       60 + game.zoom * (i + 2) + 1,
+#                                       game.zoom - 2, game.zoom - 2])
+#         pygame.draw.rect(screen, WHITE, [-30 + game.zoom * 2, 60 + game.zoom * 2, game.zoom * 4, game.zoom * 4], 1)
 
-    font = pygame.font.SysFont('Comic Sans', 25, True, False)
-    font1 = pygame.font.SysFont('Comic Sans', 65, True, False)
-    text = font.render("Score: " + str(game.score), True, WHITE)
-    next_text = font.render("Next:", True, WHITE)
-    reserved_text = font.render("Reserved:", True, WHITE)
-    text_game_over = font1.render("Game Over", True, (255, 125, 0))
-    text_restart = font1.render("Press ESC", True, (255, 215, 0))
+#     font = pygame.font.SysFont('Comic Sans', 25, True, False)
+#     font1 = pygame.font.SysFont('Comic Sans', 65, True, False)
+#     text = font.render("Score: " + str(game.score), True, WHITE)
+#     next_text = font.render("Next:", True, WHITE)
+#     reserved_text = font.render("Reserved:", True, WHITE)
+#     text_game_over = font1.render("Game Over", True, (255, 125, 0))
+#     text_restart = font1.render("Press ESC", True, (255, 215, 0))
 
-    screen.blit(text, [0, 0])
-    screen.blit(next_text, [315, 25])
-    screen.blit(reserved_text, [0, 25])
-    if game.state == "gameover":
-        screen.blit(text_game_over, [20, 200])
-        screen.blit(text_restart, [25, 265])
+#     screen.blit(text, [0, 0])
+#     screen.blit(next_text, [315, 25])
+#     screen.blit(reserved_text, [0, 25])
+#     if game.state == "gameover":
+#         screen.blit(text_game_over, [20, 200])
+#         screen.blit(text_restart, [25, 265])
 
-    pygame.display.flip()
-    clock.tick(fps)
+#     pygame.display.flip()
+#     clock.tick(fps)
 
-pygame.quit()
+# pygame.quit()

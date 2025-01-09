@@ -1,14 +1,12 @@
 from agent import Agent
 from selfmadetetris import Board
 import pygame
-import gym
 
-env = gym.Board()
+env = Board()
 env.reset()
 exit_program = False
 while not exit_program:
     env.render()
-    (x, y, xspeed, yspeed), reward, done = env.step((boost, left, right)) 
 
     # Process game events
     for event in pygame.event.get():
@@ -32,5 +30,7 @@ while not exit_program:
                 left = False
                 right = False
                 env.reset()
+            if event.key == pygame.K_q:
+                exit_program = True
 
 env.close()

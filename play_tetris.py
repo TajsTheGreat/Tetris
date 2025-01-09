@@ -4,31 +4,52 @@ import pygame
 env = Board()
 env.reset()
 exit_program = False
-while not exit_program:
-    env.render()
-    (x, y, xspeed, yspeed), reward, done = env.step((boost, left, right)) 
+counter = 0
 
-    # Process game events
+x = 0
+down = False
+space = False
+reserve = False
+rotate = False
+
+clock = pygame.time.Clock()
+fps = 50
+
+while not exit_program:
+    counter += 1
+    if counter > 100000:
+        counter = 0
+
+    env.render(counter)
+
+    # controls
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            exit_program = True
+            done = True
         if event.type == pygame.KEYDOWN:
-            if event.key in [pygame.K_ESCAPE, pygame.K_q]:
-                exit_program = True
             if event.key == pygame.K_UP:
-                boost = True
+                rotate = True
             if event.key == pygame.K_DOWN:
-                boost = False
-            if event.key == pygame.K_RIGHT:
-                left = False if right else True
-                right = False
+                pressing_down = True
             if event.key == pygame.K_LEFT:
-                right = False if left else True
-                left = False
-            if event.key == pygame.K_r:
-                boost = False        
-                left = False
-                right = False
-                env.reset()
+                x = -1
+            if event.key == pygame.K_RIGHT:
+                x = 1
+            if event.key == pygame.K_SPACE:
+                space = True
+            if event.key == pygame.K_ESCAPE:
+                env.reset
+            if event.key == pygame.K_x:
+                reserve = True
+            if event.key == pygame.K_q:
+                exit_program = True
+        
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_DOWN:
+                pressing_down = False
+    
+    action = x, down, rotate, space, reserve
+    action = env.step(action)
+    clock.tick(fps)
 
 env.close()
