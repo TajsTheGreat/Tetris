@@ -14,14 +14,14 @@ class Model(torch.nn.Module):
         self.fc1 = nn.Linear(input_dim, H)
         self.fc2 = nn.Linear(H, H)
         self.fc3 = nn.Linear(H, output_dim)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.loss_function = nn.MSELoss() # if not working add reduction='sum'
     
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-    
-loss_function = nn.MSELoss() # if not working add reduction='sum'
 
 class Agent():
     theTerminalState = False
@@ -31,7 +31,6 @@ class Agent():
 
         self.batchMaxLength = batchMaxLength
         self.batch = deque(maxlen = self.batchMaxLength)
-        self.batch_size = 0
         self.replay_buffer = ReplayBuffer(self.batchMaxLength)
 
         self.gamma = gamma
@@ -56,7 +55,9 @@ class Agent():
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 3)
         else:
-            state = torch.tensor()
+            state = torch.tensor([obs]).to(self.model.device)
+            actions = self.model.forward(state)
+            return torch.argmax(actions).item()
     
     # this stores the experience in the batch
     def updateBatch(self, state, new_state, action, reward, done):
@@ -71,11 +72,36 @@ class Agent():
     
     # learns from the experience
     def experience(self):
-        if self.batch_size < self.samplesize:
+        if self.index < self.samplesize:
             return
 
         if self.epsilon > self.epsilon_min:
             self.epsilon -= self.epsilon_decay
+        
+        self.model.optimizer.zero_grad()
+        
+        max_size = min(self.batchMaxLength, self.index)
+        batch = np.random.choice(max_size, self.samplesize, replace=False)
+
+        batch_index = np.arange(self.samplesize, dtype=np.int32)
+
+        state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
+
+        action_batch = self.action_mem[batch]
+
+        new_state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
+        reward_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
+        terminal_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
+
+        q_values = self.model.forward(state_batch)[batch_index, action_batch]
+        q_values_next = self.model.forward(new_state_batch)
+        q_values_next[terminal_batch] = 0.0
+
+        q_reward = reward_batch + self.gamma * torch.max(q_values_next, dim=1)[0]
+
+        loss = self.model.loss_function(q_reward, q_values).to(self.model.device)
+        loss.backward()
+        self.model.optimizer.step()
 
     # this loads the weights of the model
     def loadWeights(self):
@@ -92,11 +118,6 @@ class Agent():
         'model_state_dict': self.model.state_dict(),
         'optimizer_state_dict': self.optimizer.state_dict()
         }, self.weightPath)
-    
-
-
-def train_func():
-    pass
 
 class ReplayBuffer():
     def __init__(self, capacity):
