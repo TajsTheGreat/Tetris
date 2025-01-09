@@ -13,55 +13,71 @@ class Model(torch.nn.Module):
         super(Model, self).__init__()
         self.fc1 = nn.Linear(input_dim, H)
         self.fc2 = nn.Linear(H, H)
-        self.fc3 = nn.Linear(H, H)
-        self.fc4 = nn.Linear(H, output_dim)
+        self.fc3 = nn.Linear(H, output_dim)
     
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = self.fc3(x)
         return x
     
 loss_function = nn.MSELoss() # if not working add reduction='sum'
 
-device = "cpu"
-
 class Agent():
     theTerminalState = False
     
-    def __init__(self, id):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-4, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id
 
-        self.batchMaxLength = 100_000
+        self.batchMaxLength = batchMaxLength
         self.batch = deque(maxlen = self.batchMaxLength)
         self.batch_size = 0
         self.replay_buffer = ReplayBuffer(self.batchMaxLength)
 
-        self.gamma = 0.99
-        self.epsilon = 1.0
-        self.epsilon_decay = 10**-7 
-        self.epsilon_min = 0.01
-        self.batch_size = 32
-        self.update_rate = 1000
-        self.update_counter = 0
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.epsilon_decay = epsilon_decay
+        self.epsilon_min = epsilon_min
+        self.lr = lr
+        self.samplesize = samplesize
+        self.index = 0
 
-        self.model = Model(13, 4).to(device)
+        self.model = Model(input_dim, output_dim)
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.weightPath = f"Models/{self.id}.pt"
 
-        self.state_memory = 
+        self.state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
+        self.new_state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
+        self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
+        self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
+        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=np.bool)
     
-    def act(self, state):
-        if self.epsilon > self.epsilon_min:
-            self.epsilon -= self.epsilon_decay
-        
+    def act(self, obs):    
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 3)
         else:
-            state = torch.tensor(state).to(device)
-            return torch.argmax(self.model(state)).item()
+            state = torch.tensor()
+    
+    # this stores the experience in the batch
+    def updateBatch(self, state, new_state, action, reward, done):
+        i = self.index % self.batchMaxLength
+        self.state_mem[i] = state
+        self.new_state_mem[i] = new_state
+        self.action_mem[i] = action
+        self.reward_mem[i] = reward
+        self.terminal_mem[i] = done
 
+        self.index += 1
+    
+    # learns from the experience
+    def experience(self):
+        if self.batch_size < self.samplesize:
+            return
+
+        if self.epsilon > self.epsilon_min:
+            self.epsilon -= self.epsilon_decay
+
+    # this loads the weights of the model
     def loadWeights(self):
         try:
             checkpoint = torch.load(self.weightPath)
@@ -70,12 +86,18 @@ class Agent():
         except:
             pass
 
+    # this saves the weights of the model
     def saveWeights(self):
         torch.save({
         'model_state_dict': self.model.state_dict(),
         'optimizer_state_dict': self.optimizer.state_dict()
         }, self.weightPath)
     
+
+
+def train_func():
+    pass
+
 class ReplayBuffer():
     def __init__(self, capacity):
         self.buffer = deque(maxlen=capacity)
@@ -88,7 +110,3 @@ class ReplayBuffer():
 
     def size(self):
         return len(self.buffer)
-    
-def train_func():
-    pass
-
