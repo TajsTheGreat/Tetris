@@ -34,7 +34,6 @@ class Model(torch.nn.Module):
 
 # the agent
 class Agent():
-    theTerminalState = False
     
     def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id

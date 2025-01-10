@@ -36,12 +36,15 @@ class Piece:
         self.color = random.randint(1, len(colors) - 1)
         self.rotation = 0
 
+    # returns the image of the piece, basically where it is in the grid
     def image(self):
         return self.pieces[self.type][self.rotation % len(self.pieces[self.type])]
 
+    # rotates the piece one time
     def rotate(self):
         self.rotation = (self.rotation + 1) % len(self.pieces[self.type])
     
+    # rotates the piece to a specific value
     def specific_rotate(self, value):
         self.rotation = value % len(self.pieces[self.type])
 
@@ -77,6 +80,7 @@ class Tetris:
         self.piece = self.next_piece
         self.next_new_piece()
     
+    # reserves a piece
     def reserve_piece(self):
         if self.reserve_piece is not None:
             temp = self.piece
@@ -86,6 +90,7 @@ class Tetris:
             self.reserved_piece = self.piece
             self.new_piece()
 
+    # checks if the piece intersects with the field
     def intersects(self):
         intersection = False
         for i in range(4):
@@ -175,6 +180,7 @@ class Tetris:
         if self.intersects():
             self.piece.rotation = old_rotation
     
+    # moves the piece to the desired location and rotates it
     def place(self, firstvalue, secondvalue):
         self.piece.specific_rotate(firstvalue)
         while not (self.intersects() or self.piece.x == secondvalue):
@@ -213,6 +219,7 @@ class Tetris:
         self.next_new_piece()
         self.height_measure()
     
+    # returns the current type of piece
     def get_piece(self):
         arr = []
         if self.piece is None:
