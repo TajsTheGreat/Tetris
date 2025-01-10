@@ -51,7 +51,7 @@ class Agent():
         self.new_state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
         self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
-        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=np.bool_)
+        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=np.bool)
     
     def act(self, obs):    
         if random.uniform(0, 1) < self.epsilon:

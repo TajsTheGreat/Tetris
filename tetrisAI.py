@@ -23,6 +23,10 @@ while not exit_program:
             if event.type == pygame.QUIT:
                 exit_program = True
                 done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    exit_program = True
+                    done = True
         
         # Observes the current state of the environment
         obs = env.get_state()
