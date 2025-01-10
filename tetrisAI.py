@@ -8,7 +8,7 @@ env.reset()
 exit_program = False
 env.render()
 
-active = True
+pause = False
 
 theBrain = Agent("first", 0.99, 1, 0.001, [17], 40, 150)
 
@@ -27,6 +27,8 @@ while not exit_program:
                 if event.key == pygame.K_q:
                     exit_program = True
                     done = True
+                if event.key == pygame.K_p:
+                    pause = not pause
         
         # Observes the current state of the environment
         obs = env.get_state()
@@ -46,8 +48,10 @@ while not exit_program:
         # Learns from the batch of experiences and updates the model
         theBrain.experience()
 
+        if pause:
+            sleep(0.5)
+
     print(f"Score: {env.game.score}, Batchsize: {theBrain.index}, Epsilon: {theBrain.epsilon}")
     env.reset()
-    # sleep(0.5)
 
 env.close()
