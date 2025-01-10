@@ -10,8 +10,15 @@ env.render()
 
 pause = False
 name = input("Enter the name of the model you want to load: ")
+lr = 0.0005
+gamma = 0.99
+epsilon = 1
+input_dim = 17
+output_dim = 40
+samplesize = 150
+name = f"name:{name}, lr:{lr}, gamma:{gamma}, epsilon:{epsilon}, input_dim:{input_dim}, output_dim:{output_dim}, samplesize:{samplesize}"
 
-theBrain = Agent(name, 0.99, 1, 0.001, [17], 40, 150)
+theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize)
 
 while not exit_program:
 
