@@ -276,11 +276,17 @@ class Board():
                 temp.append(0)
             return tuple(temp), 0, True
         score = self.game.score
+        height_total = 0
+        for i in range(len(self.game.heights)):
+            height_total += self.game.heights[i]
         # firstvalue is the rotation of the piece and secondvalue is the x value of the piece
         firstvalue = int(str(value)[0]) if value > 9 else 0
         secondvalue = int(str(value)[1]) if value > 9 else value
         self.game.place(firstvalue, secondvalue)
-        return self.get_state(), self.game.score - score, False if self.game.state == "start" else True
+        height_total2 = 0
+        for i in range(len(self.game.heights)):
+            height_total2 += self.game.heights[i]
+        return self.get_state(), (self.game.score - score + (height_total - height_total2 + 5)), False if self.game.state == "start" else True
     
     def get_state(self):
         temp = []
