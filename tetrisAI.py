@@ -9,7 +9,6 @@ exit_program = False
 env.render()
 
 active = True
-counter = 0
 
 theBrain = Agent("first", 0.99, 1, 0.001, [17], 40, 150)
 
@@ -47,10 +46,8 @@ while not exit_program:
         # Learns from the batch of experiences and updates the model
         theBrain.experience()
 
-    print(f"Score: {env.game.score}, Batchsize: {theBrain.index}")
-    counter += 1
-    if counter % 50 == 0:
-        sleep(0.5)
+    print(f"Score: {env.game.score}, Batchsize: {theBrain.index}, Epsilon: {theBrain.epsilon}")
     env.reset()
+    # sleep(0.5)
 
 env.close()
