@@ -51,13 +51,13 @@ class Agent():
         self.new_state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
         self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
-        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=np.bool)
+        self.terminal_mem = np.zeros(self.batchMaxLength, dtype=bool)
     
     def act(self, obs):    
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 39)
         else:
-            state = torch.tensor([obs]).to(self.model.device)
+            state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
             actions = self.model.forward(state)
             return torch.argmax(actions).item()
     
@@ -68,7 +68,7 @@ class Agent():
         self.new_state_mem[i] = new_state
         self.action_mem[i] = action
         self.reward_mem[i] = reward
-        self.terminal_mem[i] = done
+        self.terminal_mem[i] = bool(done)
 
         self.index += 1
     
@@ -91,12 +91,13 @@ class Agent():
 
         action_batch = self.action_mem[batch]
 
-        new_state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
-        reward_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
-        terminal_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
+        new_state_batch = torch.tensor(self.new_state_mem[batch]).to(self.model.device)
+        reward_batch = torch.tensor(self.reward_mem[batch]).to(self.model.device)
+        terminal_batch = torch.tensor(self.terminal_mem[batch], dtype=torch.bool).to(self.model.device)
 
         q_values = self.model.forward(state_batch)[batch_index, action_batch]
         q_values_next = self.model.forward(new_state_batch)
+
         q_values_next[terminal_batch] = 0.0
 
         q_reward = reward_batch + self.gamma * torch.max(q_values_next, dim=1)[0]
