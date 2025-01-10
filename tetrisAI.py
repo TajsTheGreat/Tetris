@@ -84,6 +84,23 @@ while not exit_program:
     if game_counter % 100 == 0:
         print(f"100 last games:{dic_100}, game number: {game_counter}, batch index: {theBrain.index}, epsilon: {theBrain.epsilon}")
         dic_100 = {}
+    
+    if game_counter % 500 == 0:
+        for i in range(100):
+            env.reset()
+            done = False
+            while not done:
+                env.render()
+                obs = env.get_state()
+                action = theBrain.evaluate(obs)
+                obs_, reward, done = env.step(action)
+            if env.game.score not in dic_100:
+                dic_100[env.game.score] = 1
+            else:
+                dic_100[env.game.score] += 1
+        print(f"100 evaluated games:{dic_100}")
+        dic_100 = {}
+
 
     env.reset()
 

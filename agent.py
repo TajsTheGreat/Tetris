@@ -36,13 +36,12 @@ class Model(torch.nn.Module):
 class Agent():
     theTerminalState = False
     
-    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-5, epsilon_min=0.05, batchMaxLength=100_000):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id
 
         # creates replay memory
         self.batchMaxLength = batchMaxLength
         self.batch = deque(maxlen = self.batchMaxLength)
-        self.replay_buffer = ReplayBuffer(self.batchMaxLength)
 
         # defines parameters
         self.gamma = gamma
@@ -130,6 +129,11 @@ class Agent():
         
         # updates network weights using the optimizer
         self.model.optimizer.step()
+    
+    def evaluate(self, state):
+        state = torch.tensor([state], dtype=torch.float32).to(self.model.device)
+        actions = self.model.forward(state)
+        return torch.argmax(actions).item()
 
     # this loads the weights of the model
     def loadWeights(self):
@@ -146,16 +150,3 @@ class Agent():
         'model_state_dict': self.model.state_dict(),
         'optimizer_state_dict': self.model.optimizer.state_dict()
         }, self.weightPath)
-
-class ReplayBuffer():
-    def __init__(self, capacity):
-        self.buffer = deque(maxlen=capacity)
-
-    def store(self, experience):
-        self.buffer.append(experience)
-
-    def sample(self, batch_size):
-        return random.sample(self.buffer, batch_size)
-
-    def size(self):
-        return len(self.buffer)
