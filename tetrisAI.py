@@ -7,6 +7,9 @@ env = Board()
 env.reset()
 exit_program = False
 env.render()
+game_counter = 0
+dic_20 = {}
+dic_100 = {}
 
 pause = False
 name = input("Enter the name of the model you want to load: ")
@@ -62,7 +65,26 @@ while not exit_program:
                 if event.key == pygame.K_p:
                     pause = not pause
 
-    print(f"Score: {env.game.score}, Batchsize: {theBrain.index}, Epsilon: {theBrain.epsilon}")
+    
+    game_counter += 1
+    if env.game.score not in dic_20:
+        dic_20[env.game.score] = 1
+    else:
+        dic_20[env.game.score] += 1
+
+    if env.game.score not in dic_100:
+        dic_100[env.game.score] = 1
+    else:
+        dic_100[env.game.score] += 1
+
+    if game_counter % 20 == 0:
+        print(f"20 last games:{dic_20}")
+        dic_20 = {}
+
+    if game_counter % 100 == 0:
+        print(f"100 last games:{dic_100}, game number: {game_counter}, batch index: {theBrain.index}, epsilon: {theBrain.epsilon}")
+        dic_100 = {}
+
     env.reset()
 
 theBrain.saveWeights()
