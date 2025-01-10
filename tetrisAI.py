@@ -16,7 +16,9 @@ epsilon = 1
 input_dim = 17
 output_dim = 40
 samplesize = 150
-name = f"name:{name}, lr:{lr}, gamma:{gamma}, epsilon:{epsilon}, input_dim:{input_dim}, output_dim:{output_dim}, samplesize:{samplesize}"
+
+# needs to use _ instead of : in the name
+name = f"name_{name}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}"
 
 theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize)
 
