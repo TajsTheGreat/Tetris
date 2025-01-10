@@ -96,6 +96,7 @@ class Tetris:
                             j + self.piece.x < 0 or \
                             self.field[i + self.piece.y][j + self.piece.x] > 0:
                         intersection = True
+                        break
         return intersection
 
     # checks if lines are full and clears them if they are
@@ -176,13 +177,11 @@ class Tetris:
     
     def place(self, firstvalue, secondvalue):
         self.piece.specific_rotate(firstvalue)
-        while not self.intersects():
+        while not (self.intersects() or self.piece.x == secondvalue):
             if 0 < (secondvalue - self.piece.x):
                 self.piece.x += 1
             elif 0 > (secondvalue - self.piece.x):
                 self.piece.x -= 1
-            if self.piece.x == secondvalue:
-                break
         if self.intersects():
             if self.piece.x > 0:
                 self.piece.x -= 1
@@ -250,7 +249,7 @@ class Board():
         self.RED = (255, 0, 0)
 
         # screen size
-        self.size = (400, 500)
+        self.size = (500, 550)
         self.screen = pygame.display.set_mode(self.size)
 
         pygame.display.set_caption("Tetris")
@@ -376,4 +375,3 @@ class Board():
     # Close the game
     def close(self):
         pygame.quit()
-        
