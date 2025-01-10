@@ -15,7 +15,8 @@ class Model(torch.nn.Module):
         super(Model, self).__init__()
         self.fc1 = nn.Linear(*input_dim, H)
         self.fc2 = nn.Linear(H, H)
-        self.fc3 = nn.Linear(H, output_dim)
+        self.fc3 = nn.Linear(H, H)
+        self.fc4 = nn.Linear(H, output_dim)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -27,14 +28,15 @@ class Model(torch.nn.Module):
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
         return x
 
 # the agent
 class Agent():
     theTerminalState = False
     
-    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-6, epsilon_min=0.01, batchMaxLength=100_000):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=1e-5, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id
 
         # creates replay memory
