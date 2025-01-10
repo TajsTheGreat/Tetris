@@ -9,8 +9,9 @@ exit_program = False
 env.render()
 
 pause = False
+name = input("Enter the name of the model you want to load: ")
 
-theBrain = Agent("first", 0.99, 1, 0.001, [17], 40, 150)
+theBrain = Agent(name, 0.99, 1, 0.001, [17], 40, 150)
 
 while not exit_program:
 
@@ -18,17 +19,6 @@ while not exit_program:
 
     while not done:
 
-        # controls
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit_program = True
-                done = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    exit_program = True
-                    done = True
-                if event.key == pygame.K_p:
-                    pause = not pause
         
         # Observes the current state of the environment
         obs = env.get_state()
@@ -50,8 +40,22 @@ while not exit_program:
 
         if pause:
             sleep(0.5)
+        
+        # controls
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit_program = True
+                done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    exit_program = True
+                    done = True
+                if event.key == pygame.K_p:
+                    pause = not pause
 
     print(f"Score: {env.game.score}, Batchsize: {theBrain.index}, Epsilon: {theBrain.epsilon}")
     env.reset()
+
+theBrain.saveWeights()
 
 env.close()
