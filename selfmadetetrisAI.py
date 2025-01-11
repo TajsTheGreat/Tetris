@@ -60,6 +60,7 @@ class Tetris:
         self.piece= None
         self.next_piece = None
         self.reserved_piece = None
+        self.lowest = 100
     
         self.height = height
         self.width = width
@@ -152,10 +153,14 @@ class Tetris:
 
     # freezes the piece in place
     def freeze(self):
+        count = 0
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in self.piece.image():
+                    count += 1
                     self.field[i + self.piece.y][j + self.piece.x] = self.piece.color
+                    if count == 4:
+                        self.lowest = self.height - (self.piece.y + i)
 
         self.break_lines()
         self.new_piece()
@@ -294,13 +299,13 @@ class Board():
         height_total = 0
         height_avg = sum(self.game.heights) / len(self.game.heights)
         height_var = 0
-        # min_height = self.game.height
+        min_height = self.game.height
         # count = []
         for i in range(len(self.game.heights)):
             height_total += self.game.heights[i]
             height_var += (self.game.heights[i] - height_avg) ** 2
-            # if self.game.heights[i] < min_height:
-            #     min_height = self.game.heights[i]
+            if self.game.heights[i] < min_height:
+                min_height = self.game.heights[i]
             #     count.clear()
             #     count.append(i)
             # elif self.game.heights[i] == min_height:
@@ -323,10 +328,11 @@ class Board():
         #     if i in count and not (self.game.heights[i] == min_height):
         #         holes += 1 
 
-        height_reward = 15 if height_total - height_total2 == -4 else 5 * (height_total - height_total2)
-        height_var_reward = (height_var - height_var2) * 0.1
+        self.height_reward = 15 if height_total - height_total2 == -4 else  (height_total - height_total2)
+        # self.height_var_reward = (height_var - height_var2) * 0.1
+        self.height_low_reward = (min_height - self.game.lowest + 2) * 2
 
-        return self.get_state(), (self.game.score - score + height_reward + height_var_reward), False if self.game.state == "start" else True
+        return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward), False if self.game.state == "start" else True
     
     def get_state(self):
         if self.game.state == "start" and self.game.piece is None:
