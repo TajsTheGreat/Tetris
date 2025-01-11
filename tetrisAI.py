@@ -3,7 +3,7 @@ from selfmadetetrisAI import Board
 import pygame
 from time import sleep
 
-from bokeh.plotting import figure, show, output_file
+from bokeh.plotting import figure, show, output_file, save
 from bokeh.layouts import row
 output_file("runtime_data.html")  # Save plot as an HTML file
 p = figure(title="Example Plot")
@@ -24,16 +24,16 @@ avg_x = []
 
 pause = False
 name = input("Enter the name of the model you want to load: ")
-lr = 0.001
+lr = 0.0001
 gamma = 0.999
 epsilon = 1
 input_dim = 17
 output_dim = 40
 samplesize = 150
 
-epsilon_decay = 5e-5
+epsilon_decay = 1e-6
 epsilon_min = 0.01
-batchMaxLength = 10_000
+batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
 name = f"name_{name}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
@@ -122,6 +122,7 @@ while not exit_program:
         
         # uncomment the line below to show the plot, but it will open a new tab in your browser for every 100 games
         # show(row(avg_moves_fig, avg_num_pos_games_fig))
+        save(row(avg_moves_fig, avg_num_pos_games_fig))
 
 
         avg_moves = 0

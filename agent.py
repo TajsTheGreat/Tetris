@@ -7,8 +7,7 @@ import numpy as np
 from collections import deque
 
 # amount of neurons in each hidden layer
-H = 250
-N = 150
+H = 200
 
 # the neural network
 class Model(torch.nn.Module):
@@ -17,8 +16,8 @@ class Model(torch.nn.Module):
         self.fc1 = nn.Linear(*input_dim, H)
         self.fc2 = nn.Linear(H, H)
         self.fc3 = nn.Linear(H, H)
-        self.fc4 = nn.Linear(H, N)
-        self.fc5 = nn.Linear(N, output_dim)
+        self.fc4 = nn.Linear(H, H)
+        self.fc5 = nn.Linear(H, output_dim)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
