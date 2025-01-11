@@ -13,17 +13,21 @@ dic_100 = {}
 
 pause = False
 name = input("Enter the name of the model you want to load: ")
-lr = 0.0005
-gamma = 0.99
+lr = 0.001
+gamma = 0.999
 epsilon = 1
 input_dim = 17
 output_dim = 40
 samplesize = 150
 
-# needs to use _ instead of : in the name
-name = f"name_{name}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}"
+epsilon_decay = 1e-5
+epsilon_min = 0.01
+batchMaxLength = 10_000
 
-theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize)
+# needs to use _ instead of : in the name
+name = f"name_{name}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
+
+theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
 
 while not exit_program:
 

@@ -292,16 +292,16 @@ class Board():
         # score and height total before the piece is placed
         score = self.game.score
         height_total = 0
-        min_height = self.game.height
-        count = []
+        # min_height = self.game.height
+        # count = []
         for i in range(len(self.game.heights)):
             height_total += self.game.heights[i]
-            if self.game.heights[i] < min_height:
-                min_height = self.game.heights[i]
-                count.clear()
-                count.append(i)
-            elif self.game.heights[i] == min_height:
-                count.append(i)
+            # if self.game.heights[i] < min_height:
+            #     min_height = self.game.heights[i]
+            #     count.clear()
+            #     count.append(i)
+            # elif self.game.heights[i] == min_height:
+            #     count.append(i)
 
         # firstvalue is the rotation of the piece and secondvalue is the x value of the piece
         firstvalue = int(str(value)[0]) if value > 9 else 0
@@ -310,13 +310,15 @@ class Board():
 
         # score and height total after the piece is placed
         height_total2 = 0
-        holes = 0
+        # holes = 0
         for i in range(len(self.game.heights)):
             height_total2 += self.game.heights[i]
-            if i in count and not (self.game.heights[i] == min_height):
-                holes += 1 
+        #     if i in count and not (self.game.heights[i] == min_height):
+        #         holes += 1 
 
-        return self.get_state(), (self.game.score - score + (height_total - height_total2 + 5) + holes), False if self.game.state == "start" else True
+        height_reward = 15 if height_total - height_total2 == -4 else -5 * (height_total - height_total2) ** 2
+
+        return self.get_state(), (self.game.score - score + height_reward), False if self.game.state == "start" else True
     
     def get_state(self):
         if self.game.state == "start" and self.game.piece is None:
