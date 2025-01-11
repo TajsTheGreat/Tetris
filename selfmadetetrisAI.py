@@ -270,6 +270,9 @@ class Board():
         # background color
         self.screen.fill(self.BLACK)
         self.pressing_down = False
+
+        # controls wheter the game is rendering or not
+        self.rendering = True
     
     def reset(self):
         # Program status
@@ -316,6 +319,8 @@ class Board():
         return self.get_state(), (self.game.score - score + (height_total - height_total2 + 5) + holes), False if self.game.state == "start" else True
     
     def get_state(self):
+        if self.game.state == "start" and self.game.piece is None:
+            self.game.new_piece()
         temp = []
         for i in range(len(self.game.heights)):
             temp.append(self.game.heights[i])
@@ -329,6 +334,11 @@ class Board():
     def render(self):
         if self.game.state == "start" and self.game.piece is None:
             self.game.new_piece()
+        
+        # check if should render
+        if not self.rendering:
+            pygame.display.flip()
+            return
 
         # background color
         self.screen.fill(self.BLACK)

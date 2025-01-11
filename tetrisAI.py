@@ -64,6 +64,8 @@ while not exit_program:
                     done = True
                 if event.key == pygame.K_p:
                     pause = not pause
+                if event.key == pygame.K_r:
+                    env.rendering = not env.rendering
 
     
     game_counter += 1
@@ -78,11 +80,11 @@ while not exit_program:
         dic_100[env.game.score] += 1
 
     if game_counter % 20 == 0:
-        print(f"20 last games:{dic_20}")
+        print(f"20 last games:{dict(sorted(dic_20.items()))}")
         dic_20 = {}
 
     if game_counter % 100 == 0:
-        print(f"100 last games:{dic_100}, game number: {game_counter}, batch index: {theBrain.index}, epsilon: {theBrain.epsilon}")
+        print(f"100 last games:{dict(sorted(dic_100.items()))}, game number: {game_counter}, batch index: {theBrain.index}, epsilon: {theBrain.epsilon}")
         dic_100 = {}
     
     if game_counter % 500 == 0:
@@ -98,7 +100,7 @@ while not exit_program:
                 dic_100[env.game.score] = 1
             else:
                 dic_100[env.game.score] += 1
-        print(f"100 evaluated games:{dic_100}")
+        print(f"100 evaluated games:{dict(sorted(dic_100.items()))}")
         dic_100 = {}
 
 
