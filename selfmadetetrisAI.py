@@ -166,10 +166,10 @@ class Tetris:
         self.new_piece()
         if self.intersects():
             self.state = "gameover" 
+        self.height_measure()
         for i in range(len(self.heights)):
             if self.heights[i] > self.height - 4:
                 self.state = "gameover"
-        self.height_measure()
 
     # moves the piece left or right
     def go_side(self, dx):
@@ -347,7 +347,7 @@ class Board():
 
         
     
-    def render(self):
+    def render(self, snapshot=False):
         if self.game.state == "start" and self.game.piece is None:
             self.game.new_piece()
         
@@ -413,7 +413,7 @@ class Board():
         self.screen.blit(text, [0, 0])
         self.screen.blit(next_text, [315, 25])
         self.screen.blit(reserved_text, [0, 25])
-        if self.game.state == "gameover":
+        if self.game.state == "gameover" and not snapshot:
             self.screen.blit(text_game_over, [20, 200])
             self.screen.blit(text_restart, [25, 265])
         

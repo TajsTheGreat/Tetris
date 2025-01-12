@@ -145,6 +145,7 @@ class Agent():
             self.model.load_state_dict(checkpoint['model_state_dict'])
             self.model.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         except:
+            print("Error: No weights found")
             pass
 
     # this saves the weights of the model
