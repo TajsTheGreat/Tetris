@@ -331,9 +331,9 @@ class Board():
         #     if i in count and not (self.game.heights[i] == min_height):
         #         holes += 1 
 
-        self.height_reward = (height_total - height_total2)
+        self.height_reward = 15 if height_total - height_total2 == -4 else (height_total - height_total2)
         # self.height_var_reward = (height_var - height_var2) * 0.1
-        self.height_low_reward = (min_height - self.game.lowest + 1) * 2
+        self.height_low_reward = (min_height - self.game.lowest + 2) * 2
 
         # game end negative reward
         game_end_reward = -1000 if self.game.state == "gameover" else 0
