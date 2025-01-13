@@ -46,9 +46,9 @@ while not exit_program:
             # Learns from the batch of experiences and updates the model
             theBrain.experience()
 
+            env.render()
             print(f"Reward: {reward}, height reward: {env.height_reward}, height low reward:{env.height_low_reward}")
             next = False
-            env.render()
         
         # controls
         for event in pygame.event.get():

@@ -139,6 +139,9 @@ class Agent():
         
         # updates network weights using the optimizer
         self.model.optimizer.step()
+
+        # return loss_funtion.item()
+        return loss_funtion.item()
     
     def evaluate(self, state):
         state = torch.tensor([state], dtype=torch.float32).to(self.model.device)

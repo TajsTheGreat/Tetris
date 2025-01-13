@@ -32,6 +32,7 @@ samplesize = 150
 epsilon_decay_factor = 0.01**(1/100_000)
 epsilon_min = 0.01
 batchMaxLength = 100_000
+loss_value = 0
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay_factor}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
@@ -67,7 +68,7 @@ while not exit_program:
 
 
         # Learns from the batch of experiences and updates the model
-        theBrain.experience()
+        loss_value = theBrain.experience()
 
         if pause:
             sleep(0.5)
