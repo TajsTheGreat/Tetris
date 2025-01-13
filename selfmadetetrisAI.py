@@ -293,6 +293,11 @@ class Board():
             for i in range(7):
                 temp.append(0)
             return tuple(temp), 0, True
+        # game end negative reward
+        game_end_reward = 0
+        if self.game.state == "gameover":
+            game_end_reward = -1000
+        
         
         # score and height total before the piece is placed
         score = self.game.score
@@ -328,11 +333,11 @@ class Board():
         #     if i in count and not (self.game.heights[i] == min_height):
         #         holes += 1 
 
-        self.height_reward = 15 if height_total - height_total2 == -4 else  (height_total - height_total2)
+        self.height_reward = (height_total - height_total2)
         # self.height_var_reward = (height_var - height_var2) * 0.1
-        self.height_low_reward = (min_height - self.game.lowest + 2) * 2
+        self.height_low_reward = (min_height - self.game.lowest + 1) * 2
 
-        return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward), False if self.game.state == "start" else True
+        return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward + game_end_reward), False if self.game.state == "start" else True
     
     def get_state(self):
         if self.game.state == "start" and self.game.piece is None:

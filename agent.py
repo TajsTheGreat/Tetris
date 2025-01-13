@@ -65,6 +65,9 @@ class Agent():
         self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
         self.terminal_mem = np.zeros(self.batchMaxLength, dtype=bool)
+
+        # experience modulus thing
+        self.step_update = 10
     
     # selects an action from the current state
     def act(self, obs):    
@@ -93,6 +96,10 @@ class Agent():
 
         # checks if there are enough experiences in the memory
         if self.index < self.samplesize:
+            return
+        
+        # How often the model is updated
+        if self.index % self.step_update != 0:
             return
 
         if self.epsilon > self.epsilon_min:
