@@ -17,8 +17,7 @@ class Model(torch.nn.Module):
         self.fc2 = nn.Linear(H, H)
         self.fc3 = nn.Linear(H, H)
         self.fc4 = nn.Linear(H, H)
-        self.fc5 = nn.Linear(H, H)
-        self.fc6 = nn.Linear(H, output_dim)
+        self.fc5 = nn.Linear(H, output_dim)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -32,8 +31,7 @@ class Model(torch.nn.Module):
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
-        x = F.relu(self.fc5(x))
-        x = self.fc6(x)
+        x = self.fc5(x)
         return x
 
 # the agent
