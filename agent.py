@@ -133,6 +133,7 @@ class Agent():
 
         # computes loss
         loss_funtion = self.model.loss_function(q_reward, q_values).to(self.model.device)
+        print(loss_funtion)
         
         # backpropagates loss
         loss_funtion.backward()
