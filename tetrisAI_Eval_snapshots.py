@@ -115,7 +115,6 @@ while not exit_program:
         # show(row(avg_moves_fig, avg_num_pos_games_fig))
         save(row(avg_moves_fig, avg_num_pos_games_fig))
 
-
         avg_moves = 0
         num_pos_games = 0
         dic_100 = {}
