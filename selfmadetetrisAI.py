@@ -295,6 +295,8 @@ class Board():
                 temp.append(0)
             return tuple(temp), 0, True
         
+        
+        
         # score and height total before the piece is placed
         score = self.game.score
         height_total = 0
@@ -332,8 +334,8 @@ class Board():
         self.height_reward = (height_total - height_total2)
         # self.height_var_reward = (height_var - height_var2) * 0.1
         self.height_low_reward = (min_height - self.game.lowest + 1) * 2
-        
-        return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward), False if self.game.state == "start" else True
+
+        return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward + game_end_reward), False if self.game.state == "start" else True
     
     def get_state(self):
         if self.game.state == "start" and self.game.piece is None:

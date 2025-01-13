@@ -22,12 +22,12 @@ avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model you want to load: ")
-lr = 0.0001
+lr = 0.00005
 gamma = 0.999
 epsilon = 1
 input_dim = 17
 output_dim = 40
-samplesize = 150
+samplesize = 200
 
 epsilon_decay_factor = 0.01**(1/100_000)
 epsilon_min = 0.01
