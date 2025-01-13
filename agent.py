@@ -98,12 +98,14 @@ class Agent():
         if self.index < self.samplesize:
             return
         
+        if self.epsilon > self.epsilon_min:
+            self.epsilon = (self.epsilon - self.epsilon_min) * self.epsilon_decay_factor + self.epsilon_min
+
+            
         # How often the model is updated
         if self.index % self.step_update != 0:
             return
 
-        if self.epsilon > self.epsilon_min:
-            self.epsilon = (self.epsilon - self.epsilon_min) * self.epsilon_decay_factor + self.epsilon_min
         
         self.model.optimizer.zero_grad()
         

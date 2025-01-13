@@ -293,10 +293,7 @@ class Board():
             for i in range(7):
                 temp.append(0)
             return tuple(temp), 0, True
-        # game end negative reward
-        game_end_reward = 0
-        if self.game.state == "gameover":
-            game_end_reward = -1000
+        
         
         
         # score and height total before the piece is placed
@@ -336,6 +333,11 @@ class Board():
         self.height_reward = (height_total - height_total2)
         # self.height_var_reward = (height_var - height_var2) * 0.1
         self.height_low_reward = (min_height - self.game.lowest + 1) * 2
+
+        # game end negative reward
+        game_end_reward = 0
+        if self.game.state == "gameover":
+            game_end_reward = -1000
 
         return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward + game_end_reward), False if self.game.state == "start" else True
     
