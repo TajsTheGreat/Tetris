@@ -5,7 +5,6 @@ from time import sleep
 
 from bokeh.plotting import figure, show, output_file, save
 from bokeh.layouts import row
-output_file("runtime_data.html")  # Save plot as an HTML file
 
 env = Board()
 env.reset()
@@ -22,7 +21,7 @@ avg_num_pos_games_y = []
 avg_x = []
 
 pause = False
-name = input("Enter the name of the model you want to load: ")
+name_input = input("Enter the name of the model you want to load: ")
 lr = 0.0001
 gamma = 0.999
 epsilon = 1
@@ -35,9 +34,11 @@ epsilon_min = 0.01
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
-name = f"name_{name}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay_factor}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
+name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay_factor}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
 
 theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay_factor=epsilon_decay_factor, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
+
+output_file(f"Models/{name_input}_runtime_data.html")  # Save plot as an HTML file
 
 while not exit_program:
 
