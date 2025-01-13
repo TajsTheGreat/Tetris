@@ -335,6 +335,9 @@ class Board():
         # self.height_var_reward = (height_var - height_var2) * 0.1
         self.height_low_reward = (min_height - self.game.lowest + 1) * 2
 
+        # game end negative reward
+        game_end_reward = -1000 if self.game.state == "gameover" else 0
+
         return self.get_state(), (self.game.score - score + self.height_reward + self.height_low_reward + game_end_reward), False if self.game.state == "start" else True
     
     def get_state(self):
