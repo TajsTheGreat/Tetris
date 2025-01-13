@@ -18,18 +18,20 @@ num_pos_games = 0
 
 avg_moves_y = []
 avg_num_pos_games_y = []
+avg_losses_y = []
+avg_losses_x = []
 avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model you want to load: ")
-lr = 0.00005
+lr = 0.0005
 gamma = 0.999
 epsilon = 1
 input_dim = 17
 output_dim = 40
 samplesize = 200
 
-epsilon_decay = 1e-6
+epsilon_decay = 1/200_000
 epsilon_min = 0.01
 batchMaxLength = 100_000
 loss_value = 0
@@ -68,7 +70,9 @@ while not exit_program:
 
 
         # Learns from the batch of experiences and updates the model
-        loss_value = theBrain.experience()
+        result = theBrain.experience()
+        if result is not None:
+            loss_value += result
 
         if pause:
             sleep(0.5)
@@ -113,6 +117,9 @@ while not exit_program:
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)
+        if game_counter >= 500:
+            avg_losses_y.append(loss_value/100)
+            avg_losses_x.append(game_counter / 100)
         
         # makes a plot of the average number of moves and the number of positive games
         avg_moves_fig = figure(title="Average number of moves", x_axis_label="Game number", y_axis_label="Average number of moves")
@@ -120,14 +127,21 @@ while not exit_program:
         
         avg_num_pos_games_fig = figure(title="Number of positive games", x_axis_label="Game number", y_axis_label="Number of positive games")
         avg_num_pos_games_fig.line(avg_x, avg_num_pos_games_y)
-        
-        # uncomment the line below to show the plot, but it will open a new tab in your browser for every 100 games
-        # show(row(avg_moves_fig, avg_num_pos_games_fig))
-        save(row(avg_moves_fig, avg_num_pos_games_fig))
+
+        if game_counter >= 500:
+            avg_losses_fig = figure(title="Average loss", x_axis_label="Game number", y_axis_label="Average loss")
+            avg_losses_fig.line(avg_losses_x, avg_losses_y)
+            
+            # uncomment the line below to show the plot, but it will open a new tab in your browser for every 100 games
+            # show(row(avg_moves_fig, avg_num_pos_games_fig))
+            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_losses_fig))
+        else:
+            save(row(avg_moves_fig, avg_num_pos_games_fig))
 
 
         avg_moves = 0
         num_pos_games = 0
+        loss_value = 0
         dic_100 = {}
         
     
