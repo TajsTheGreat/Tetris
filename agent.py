@@ -39,7 +39,7 @@ class Model(torch.nn.Module):
 # the agent
 class Agent():
     
-    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay_factor=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id
 
         # creates replay memory
@@ -49,7 +49,7 @@ class Agent():
         # defines parameters
         self.gamma = gamma
         self.epsilon = epsilon
-        self.epsilon_decay_factor = epsilon_decay_factor
+        self.epsilon_decay = epsilon_decay
         self.epsilon_min = epsilon_min
         self.lr = lr
         self.samplesize = samplesize
@@ -99,8 +99,7 @@ class Agent():
             return
         
         if self.epsilon > self.epsilon_min:
-            self.epsilon = (self.epsilon - self.epsilon_min) * self.epsilon_decay_factor + self.epsilon_min
-
+            self.epsilon -= self.epsilon_decay
             
         # How often the model is updated
         if self.index % self.step_update != 0:

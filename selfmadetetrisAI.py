@@ -293,9 +293,7 @@ class Board():
                 temp.append(self.game.heights[i])
             for i in range(7):
                 temp.append(0)
-            return tuple(temp), 0, True
-        
-        
+            return tuple(temp), -1000, True
         
         # score and height total before the piece is placed
         score = self.game.score
