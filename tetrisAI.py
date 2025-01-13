@@ -15,9 +15,12 @@ dic_20 = {}
 dic_100 = {}
 avg_moves = 0
 num_pos_games = 0
+loss_value = 0
+reward_value = 0
 
 avg_moves_y = []
 avg_num_pos_games_y = []
+avg_rewards_y = []
 avg_losses_y = []
 avg_losses_x = []
 avg_x = []
@@ -34,7 +37,6 @@ samplesize = 200
 epsilon_decay = 1/200_000
 epsilon_min = 0.01
 batchMaxLength = 100_000
-loss_value = 0
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
@@ -73,6 +75,8 @@ while not exit_program:
         result = theBrain.experience()
         if result is not None:
             loss_value += result
+        
+        reward_value += reward
 
         if pause:
             sleep(0.5)
@@ -117,6 +121,7 @@ while not exit_program:
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)
+        avg_rewards_y.append(reward_value/100)
         if game_counter >= 500:
             avg_losses_y.append(loss_value/100)
             avg_losses_x.append(game_counter / 100)
@@ -128,20 +133,24 @@ while not exit_program:
         avg_num_pos_games_fig = figure(title="Number of positive games", x_axis_label="Game number", y_axis_label="Number of positive games")
         avg_num_pos_games_fig.line(avg_x, avg_num_pos_games_y)
 
+        avg_rewards_fig = figure(title="Average reward", x_axis_label="Game number", y_axis_label="Average reward")
+        avg_rewards_fig.line(avg_x, avg_rewards_y)
+
         if game_counter >= 500:
             avg_losses_fig = figure(title="Average loss", x_axis_label="Game number", y_axis_label="Average loss")
             avg_losses_fig.line(avg_losses_x, avg_losses_y)
             
             # uncomment the line below to show the plot, but it will open a new tab in your browser for every 100 games
             # show(row(avg_moves_fig, avg_num_pos_games_fig))
-            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_losses_fig))
+            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_rewards_fig, avg_losses_fig))
         else:
-            save(row(avg_moves_fig, avg_num_pos_games_fig))
+            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_rewards_fig))
 
 
         avg_moves = 0
         num_pos_games = 0
         loss_value = 0
+        reward_value = 0
         dic_100 = {}
         
     
