@@ -53,7 +53,6 @@ while not exit_program:
     moves = 0
 
     while not done:
-
         
         # Observes the current state of the environment
         obs = env.get_state()
