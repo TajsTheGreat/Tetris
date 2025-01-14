@@ -29,15 +29,15 @@ avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model you want to load: ")
-lr = 0.001
-gamma = 0.97
+lr = 0.0005
+gamma = 0.96
 epsilon = 1
 input_dim = 17
 output_dim = 40
 samplesize = 500
 
-epsilon_min = 0.025
-epsilon_decay_factor = epsilon_min ** (1/10_000)
+epsilon_min = 0.01
+epsilon_decay_factor = (1/(200_000))
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
@@ -99,8 +99,8 @@ while not exit_program:
                 if event.key == pygame.K_r:
                     env.rendering = not env.rendering
 
-    # updates the epsilon value
-    theBrain.updateEpsilon()
+        # updates the epsilon value
+        theBrain.updateEpsilon()
 
     # saves the moves made in the game
     avg_moves += moves
