@@ -31,7 +31,6 @@ number = int(input("Enter the number of the model you want to load: "))
 # gets the parameters from the name of the model
 name = files[number - 1]
 name = name[7:-3]
-print(name)
 
 values = name.split(", ")
 
@@ -48,7 +47,7 @@ theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize)
 # to avoid errors make sure that the layers and neurons are the same as in the model
 theBrain.loadWeights()
 
-output_file(f"{name_input}_runtime_eval_data.html")  # Save plot as an HTML file
+output_file(f"Models/{name_input}_runtime_eval_data.html")  # Save plot as an HTML file
 
 snapshot = False
 
@@ -99,7 +98,7 @@ while not exit_program:
         dic_100[env.game.score] += 1
 
     if game_counter % 100 == 0:
-        # print(f"100 last games:{dict(sorted(dic_100.items()))}, game number: {game_counter}, avg moves: {avg_moves/100}")
+        print(f"100 last games:{dict(sorted(dic_100.items()))}, game number: {game_counter}, avg moves: {avg_moves/100}")
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)
@@ -121,7 +120,6 @@ while not exit_program:
 
     if snapshot:
         env.render(snapshot)
-        print(env.game.heights)
         snapshot = False
     
     if game_counter > 10_000:

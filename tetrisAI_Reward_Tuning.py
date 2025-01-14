@@ -16,12 +16,12 @@ input_dim = 17
 output_dim = 40
 samplesize = 150
 
-epsilon_decay = 1e-6
+epsilon_decay_factor = 1e-6
 epsilon_min = 0.01
 batchMaxLength = 10_000
 next = True
 
-theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
+theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay_factor=epsilon_decay_factor, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
 
 while not exit_program:
 

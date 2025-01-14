@@ -36,14 +36,14 @@ input_dim = 17
 output_dim = 40
 samplesize = 500
 
-epsilon_decay = 1/200_000
 epsilon_min = 0.025
+epsilon_decay_factor = epsilon_min ** (1/10_000)
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
-name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_decay_{epsilon_decay}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
+name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
 
-theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
+theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay_factor=epsilon_decay_factor, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
 
 output_file(f"Models/{name_input}_runtime_data.html")  # Save plot as an HTML file
 
@@ -53,7 +53,6 @@ while not exit_program:
     moves = 0
 
     while not done:
-
         
         # Observes the current state of the environment
         obs = env.get_state()
@@ -99,6 +98,9 @@ while not exit_program:
                     pause = not pause
                 if event.key == pygame.K_r:
                     env.rendering = not env.rendering
+
+    # updates the epsilon value
+    theBrain.updateEpsilon()
 
     # saves the moves made in the game
     avg_moves += moves
