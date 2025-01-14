@@ -28,7 +28,7 @@ avg_losses_x = []
 avg_x = []
 
 pause = False
-name_input = input("Enter the name of the model you want to load: ")
+name_input = input("Enter the name of the model: ")
 lr = 0.001
 gamma = 0.97
 epsilon = 1
@@ -68,7 +68,7 @@ while not exit_program:
         moves += 1
 
         if done:
-            reward = reward - (1000/(moves/20)) 
+            reward = reward - 1000 /(moves/20)
 
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action, reward, obs_, done)
