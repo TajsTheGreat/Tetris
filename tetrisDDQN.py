@@ -28,7 +28,7 @@ avg_losses_x = []
 avg_x = []
 
 pause = False
-name_input = input("Enter the name of the model you want to load: ")
+name_input = input("Enter the name of the model: ")
 lr = 0.001
 gamma = 0.97
 epsilon = 1
@@ -38,7 +38,7 @@ samplesize = 500
 
 epsilon_min = 0.025
 epsilon_decay_factor = epsilon_min ** (1/10000)
-batchMaxLength = 1e5
+batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
@@ -68,7 +68,7 @@ while not exit_program:
         moves += 1
 
         if done:
-            reward = reward - (1000/(moves/20)) 
+            reward = reward - 1000 /(moves/20)
 
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action, reward, obs_, done)
