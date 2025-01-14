@@ -38,7 +38,7 @@ samplesize = 500
 
 epsilon_min = 0.025
 epsilon_decay_factor = epsilon_min ** (1/10000)
-batchMaxLength = 1e5
+batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
