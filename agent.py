@@ -139,7 +139,7 @@ class Agent():
         return loss_funtion.item()
     
     def updateEpsilon(self):
-        self.epsilon = (self.epsilon - self.epsilon_min) * self.epsilon_decay_factor + self.epsilon_min
+        self.epsilon = self.epsilon - self.epsilon_decay_factor if self.epsilon > self.epsilon_min else self.epsilon_minilon
     
     def evaluate(self, state):
         state = torch.tensor([state], dtype=torch.float32).to(self.model.device)

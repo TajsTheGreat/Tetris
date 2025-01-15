@@ -6,15 +6,19 @@ import random
 import numpy as np
 from collections import deque
 
+# amount of neurons in each hidden layer
+H = 512
+
 # the neural network
 class Model(torch.nn.Module):
     def __init__(self, input_dim, output_dim, lr=0.01):
         super(Model, self).__init__()
         self.fc1 = nn.Linear(*input_dim, 256)
-        self.fc2 = nn.Linear(256, 256)
-        self.fc3 = nn.Linear(256, 256)
-        self.fc4 = nn.Linear(256, 256)
-        self.fc5 = nn.Linear(256, output_dim)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, 32)
+        self.fc5 = nn.Linear(32, 16)
+        self.fc6 = nn.Linear(16, output_dim)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -22,13 +26,14 @@ class Model(torch.nn.Module):
         self.loss_function = nn.MSELoss() # if not working add reduction='sum'
         self.to(self.device)
     
-    # This uses ReLu to maximize the network
+    # Uses ReLU activation function to output raw Q-values
     def forward(self, x):
         x = F.leaky_relu(self.fc1(x))
         x = F.leaky_relu(self.fc2(x))
         x = F.leaky_relu(self.fc3(x))
         x = F.leaky_relu(self.fc4(x))
-        x = self.fc5(x)
+        x = F.leaky_relu(self.fc5(x))
+        x = self.fc6(x)
         return x
 
 # the agent
