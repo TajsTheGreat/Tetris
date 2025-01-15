@@ -39,7 +39,7 @@ output_dim = 40
 samplesize = 500
 
 epsilon_min = 0.025
-epsilon_decay_factor = 1/(300_000)
+epsilon_decay_factor = 1/(400_000)
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
