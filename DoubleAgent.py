@@ -77,7 +77,9 @@ class Agent():
             return random.randint(0, 39)
         else:
             state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
-            actions = self.model.forward(state)
+            # does not calculate gradients for the action, which is not needed
+            with torch.no_grad(): 
+                actions = self.model.forward(state)
             return torch.argmax(actions).item()
     
     # stores the experience in the batch
@@ -149,7 +151,9 @@ class Agent():
     
     def evaluate(self, state):
         state = torch.tensor([state], dtype=torch.float32).to(self.model.device)
-        actions = self.model.forward(state)
+        # does not calculate gradients for the action, which is not needed
+        with torch.no_grad(): 
+            actions = self.model.forward(state)
         return torch.argmax(actions).item()
 
     # this loads the weights of the model
