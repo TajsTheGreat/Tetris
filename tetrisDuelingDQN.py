@@ -1,5 +1,5 @@
 from DoubleAgent import Agent
-from selfmadetetrisAI2 import Board
+from selfmadetetrisAI import Board
 import pygame
 from time import sleep
 
@@ -39,7 +39,7 @@ output_dim = 40
 samplesize = 500
 
 epsilon_min = 0.025
-epsilon_decay_factor = (1/(200_000))
+epsilon_decay_factor = 1/(200_000)
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
@@ -71,7 +71,7 @@ while not exit_program:
         moves += 1
 
         if done:
-            reward = reward - (100000/(moves/20)) 
+            reward = reward - (1000/(moves/20)) 
 
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action[0], reward, obs_, done)
