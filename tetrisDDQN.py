@@ -18,12 +18,14 @@ num_pos_games = 0
 loss_value = 0
 reward_value = 0
 score_value = 0
+q_value_value = 0
 
 avg_moves_y = []
 avg_num_pos_games_y = []
 avg_rewards_y = []
 avg_score_y = []
 avg_losses_y = []
+avg_q_values_y = []
 avg_losses_x = []
 avg_x = []
 
@@ -37,7 +39,7 @@ output_dim = 40
 samplesize = 500
 
 epsilon_min = 0.025
-epsilon_decay_factor = epsilon_min ** (1/10000)
+epsilon_decay_factor = 1/(300_000)
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
@@ -62,7 +64,7 @@ while not exit_program:
         env.render()
         
         # Takes the action and observes the new state, reward, and whether the game is done
-        obs_, reward, done = env.step(action)
+        obs_, reward, done = env.step(action[0])
 
         # Increments the number of moves
         moves += 1
@@ -71,7 +73,7 @@ while not exit_program:
             reward = reward - 1000 /(moves/20)
 
         # Updates the batch with the new experience
-        theBrain.updateBatch(obs, action, reward, obs_, done)
+        theBrain.updateBatch(obs, action[0], reward, obs_, done)
 
 
         # Learns from the batch of experiences and updates the model
@@ -80,6 +82,8 @@ while not exit_program:
             loss_value += result
         
         reward_value += reward
+        if action[1] is not False:
+            q_value_value += action[1]
 
         if pause:
             sleep(0.5)
@@ -98,8 +102,8 @@ while not exit_program:
                 if event.key == pygame.K_r:
                     env.rendering = not env.rendering
 
-    # updates the epsilon value
-    theBrain.updateEpsilon()
+        # updates the epsilon value
+        theBrain.updateEpsilon()
 
     # saves the moves made in the game
     avg_moves += moves
@@ -130,6 +134,7 @@ while not exit_program:
         avg_x.append(game_counter / 100)
         avg_rewards_y.append(reward_value/100)
         avg_score_y.append(score_value/100)
+        avg_q_values_y.append(q_value_value/100)
         if game_counter >= 500:
             avg_losses_y.append(loss_value/100)
             avg_losses_x.append(game_counter / 100)
@@ -147,15 +152,18 @@ while not exit_program:
         avg_score_y_fig = figure(title="Average score", x_axis_label="Game number", y_axis_label="Average score")
         avg_score_y_fig.line(avg_x, avg_score_y)
 
+        avg_q_values_y_fig = figure(title="Average Q-value", x_axis_label="Game number", y_axis_label="Average Q-value")
+        avg_q_values_y_fig.line(avg_x, avg_q_values_y)
+
         if game_counter >= 500:
             avg_losses_fig = figure(title="Average loss", x_axis_label="Game number", y_axis_label="Average loss")
             avg_losses_fig.line(avg_losses_x, avg_losses_y)
             
             # uncomment the line below to show the plot, but it will open a new tab in your browser for every 100 games
             # show(row(avg_moves_fig, avg_num_pos_games_fig))
-            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_rewards_fig, avg_score_y_fig, avg_losses_fig))
+            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_rewards_fig, avg_score_y_fig, avg_q_values_y_fig, avg_losses_fig))
         else:
-            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_rewards_fig, avg_score_y_fig))
+            save(row(avg_moves_fig, avg_num_pos_games_fig, avg_rewards_fig, avg_score_y_fig, avg_q_values_y_fig))
 
 
         avg_moves = 0
@@ -163,6 +171,7 @@ while not exit_program:
         loss_value = 0
         reward_value = 0
         score_value = 0
+        q_value_value = 0
         dic_100 = {}
         
     
