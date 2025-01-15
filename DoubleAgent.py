@@ -79,13 +79,16 @@ class Agent():
 
         # decides wether to prioritize exploration or exploitation
         if random.uniform(0, 1) < self.epsilon:
-            return random.randint(0, 39)
+            return random.randint(0, 39), False
         else:
             state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
             # does not calculate gradients for the action, which is not needed
             with torch.no_grad(): 
                 actions = self.model.forward(state)
-            return torch.argmax(actions).item()
+            chosen_action = torch.argmax(actions).item()
+            # Extracts q-values from the model for plotting
+            chosen_q_value = actions[0, chosen_action].item() 
+            return chosen_action, chosen_q_value
     
     # stores the experience in the batch
     def updateBatch(self, state, action, reward, new_state, done):

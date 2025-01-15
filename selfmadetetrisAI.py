@@ -350,6 +350,7 @@ class Board():
 
         self.height_reward = 5 if height_total - height_total2 == -4 else (height_total - height_total2)
         self.hole_opening_reward = (holes_before - holes_after) * 10  # Reward for opening holes
+
         self.height_low_reward = (min_height - self.game.lowest + 2) * 2
 
         score = self.game.score - score
