@@ -32,7 +32,7 @@ name_input = input("Enter the name of the model you want to load: ")
 lr = 0.0005
 gamma = 0.96
 epsilon = 1
-input_dim = 17
+input_dim = 18
 output_dim = 40
 samplesize = 500
 

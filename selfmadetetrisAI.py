@@ -311,6 +311,7 @@ class Board():
                 temp.append(self.game.heights[i])
             for i in range(7):
                 temp.append(0)
+            temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
             return tuple(temp), -1000, True
         
 
@@ -376,6 +377,7 @@ class Board():
             temp.append(self.game.heights[i])
         for i in range(7):
             temp.append(self.game.get_piece()[i])
+        temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
         # return the state of the game
         return tuple(temp)
 
