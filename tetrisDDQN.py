@@ -71,7 +71,7 @@ while not exit_program:
         moves += 1
 
         if done:
-            reward = reward - (1000/(moves/20)) 
+            reward = reward - (100000/(moves/20)) 
 
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action[0], reward, obs_, done)
