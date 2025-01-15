@@ -29,15 +29,15 @@ avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model you want to load: ")
-lr = 0.0005
-gamma = 0.96
+lr = 0.001
+gamma = 0.95
 epsilon = 1
 input_dim = 18
 output_dim = 40
 samplesize = 500
 
-epsilon_min = 0.01
-epsilon_decay_factor = (1/(200_000))
+epsilon_min = 0.025
+epsilon_decay_factor = (1/(100_000))
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
