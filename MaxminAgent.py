@@ -7,7 +7,7 @@ import numpy as np
 from collections import deque
 
 # amount of neurons in each hidden layer
-H = 200
+H = 256
 
 # the neural network
 class Model(torch.nn.Module):
@@ -27,10 +27,10 @@ class Model(torch.nn.Module):
     
     # Uses ReLU activation function to output raw Q-values
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
+        x = F.leaky_relu(self.fc1(x))
+        x = F.leaky_relu(self.fc2(x))
+        x = F.leaky_relu(self.fc3(x))
+        x = F.leaky_relu(self.fc4(x))
         x = self.fc5(x)
         return x
 
@@ -67,14 +67,15 @@ class Agent():
     
     def act(self, obs):    
         if random.uniform(0, 1) < self.epsilon:
-            return random.randint(0, 39)
+            return random.randint(0, 39), False
         else:
             state = torch.tensor([obs], dtype=torch.float32).to(self.models[0].device)
             with torch.no_grad():
                 actions = [model.forward(state) for model in self.models]
                 avg_actions = torch.mean(torch.stack(actions), dim=0)
             chosen_action = torch.argmax(avg_actions).item()
-            return chosen_action
+            chosen_q_value = avg_actions[0][chosen_action].item()
+            return chosen_action, chosen_q_value
 
     def updateBatch(self, state, action, reward, new_state, done):
         i = self.index % self.batchMaxLength

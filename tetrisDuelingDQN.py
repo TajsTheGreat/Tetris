@@ -1,4 +1,4 @@
-from DuelingAgent import Agent
+from DuelingDQN import Agent
 from selfmadetetrisAI import Board
 import pygame
 from time import sleep
@@ -79,6 +79,8 @@ while not exit_program:
 
         # if done:
         #     reward = reward - (1000/(moves/20)) 
+
+        reward = reward + moves
         
         height_reward_low += env.height_low_reward
         bumpiness_reward += env.bumpiness
