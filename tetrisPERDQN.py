@@ -32,7 +32,7 @@ avg_x = []
 pause = False
 name_input = input("Enter the name of the model: ")
 lr = 0.001
-gamma = 0.96
+gamma = 0.97
 epsilon = 1
 input_dim = 18
 output_dim = 40
@@ -41,6 +41,13 @@ samplesize = 500
 epsilon_min = 0.01
 epsilon_decay_factor = (1/(200_000))
 batchMaxLength = 100_000
+
+height_reward_low = 0
+bumpiness_reward = 0
+hole_reward = 0
+score_reward = 0
+move_reward = 0
+move_100_counter = 0
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
@@ -70,8 +77,15 @@ while not exit_program:
         # Increments the number of moves
         moves += 1
 
-        if done:
-            reward = reward - (1000/(moves/20)) 
+        # if done:
+        #     reward = reward - (1000/(moves/20)) 
+        
+        height_reward_low += env.height_low_reward
+        bumpiness_reward += env.bumpiness
+        hole_reward += env.hole_opening_reward
+        score_reward += env.test_score
+        move_reward += moves
+        move_100_counter += 1
 
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action[0], reward, obs_, done)
@@ -130,6 +144,7 @@ while not exit_program:
 
     if game_counter % 100 == 0:
         print(f"100 last games:{dict(sorted(dic_100.items()))}, game number: {game_counter}, batch index: {theBrain.index}, epsilon: {theBrain.epsilon}, avg moves: {avg_moves/100}")
+        print(f"height reward low: {height_reward_low/move_100_counter}, bumpiness reward: {bumpiness_reward/move_100_counter}, hole reward: {hole_reward/move_100_counter}, score reward: {score_reward/move_100_counter}, move reward: {move_reward/move_100_counter}")
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)
