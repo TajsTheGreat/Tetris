@@ -304,72 +304,74 @@ class Board():
         return holes
     
     def step(self, value):
-        if self.game.state == "gameover":
-            print("Game over")
-            temp = []
-            temp.append(sum(self.game.heights)/len(self.game.heights))
-            for i in range(1, len(self.game.heights)):
-                temp.append(self.game.heights[i] - self.game.heights[i - 1])
-            for i in range(7):
-                temp.append(0)
-            temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
-            return tuple(temp), 0, True
+            if self.game.state == "gameover":
+                print("Game over")
+                temp = []
+                for i in range(len(self.game.heights)):
+                    temp.append(self.game.heights[i])
+                for i in range(7):
+                    temp.append(0)
+                temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
+                return tuple(temp), 0, True
+            
+
+
+            # Calculate holes before placing the piece
+            holes_before = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
+
+            # score and height total before the piece is placed
+            score = self.game.score
+            height_total = 0
+            height_avg = sum(self.game.heights) / len(self.game.heights)
+            height_var = 0
+            min_height = self.game.height
+
+            for i in range(len(self.game.heights)):
+                height_total += self.game.heights[i]
+                height_var += (self.game.heights[i] - height_avg) ** 2
+                if self.game.heights[i] < min_height:
+                    min_height = self.game.heights[i]
+
+            height_var = height_var / len(self.game.heights)
+            
+
+            # Place the piece
+            firstvalue = int(str(value)[0]) if value > 9 else 0
+            secondvalue = int(str(value)[1]) if value > 9 else value
+            self.game.place(firstvalue, secondvalue)
+
+            # Calculate rewards
+            height_total2 = 0
+            for i in range(len(self.game.heights)):
+                height_total2 += self.game.heights[i]
+
+            self.height_reward = 5 if height_total - height_total2 == -4 else (height_total - height_total2)
+            
+            holes_after = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
+
+            self.height_low_reward = (min_height - self.game.lowest + 2) * 4
+
+            score = self.game.score - score
+            if score == 40:
+                score = score * 2
+            elif score == 100:
+                score = score * 1.5
+            elif score == 300:
+                score = score / 0.75
+            elif score == 1200:
+                score = score / 3
+            
+            self.test_score = score*8
+
+            self.bumpiness = -sum([abs(self.game.heights[i] - self.game.heights[i + 1]) for i in range(len(self.game.heights) - 1)])
         
+            if holes_before - holes_after == 0:
+                self.hole_opening_reward = 20
+            else:
+                self.hole_opening_reward = (holes_before - holes_after) * 60
+            
 
-
-        # Calculate holes before placing the piece
-        holes_before = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
-
-        # score and height total before the piece is placed
-        score = self.game.score
-        height_total = 0
-        height_avg = sum(self.game.heights) / len(self.game.heights)
-        height_var = 0
-        min_height = self.game.height
-
-        for i in range(len(self.game.heights)):
-            height_total += self.game.heights[i]
-            height_var += (self.game.heights[i] - height_avg) ** 2
-            if self.game.heights[i] < min_height:
-                min_height = self.game.heights[i]
-
-        height_var = height_var / len(self.game.heights)
-        holes_before = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
-
-        # Place the piece
-        firstvalue = int(str(value)[0]) if value > 9 else 0
-        secondvalue = int(str(value)[1]) if value > 9 else value
-        self.game.place(firstvalue, secondvalue)
-
-        # Calculate holes after placing the piece
-        holes_after = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
-
-        # Calculate rewards
-        height_total2 = 0
-        for i in range(len(self.game.heights)):
-            height_total2 += self.game.heights[i]
-
-        self.height_reward = 5 if height_total - height_total2 == -4 else (height_total - height_total2)
-        self.hole_opening_reward = (holes_before - holes_after) * 10  # Reward for opening holes
-
-        self.height_low_reward = (min_height - self.game.lowest + 2) * 2
-
-        score = self.game.score - score
-        if score == 40:
-            score = score * 2
-        elif score == 100:
-            score = score * 1.5
-        elif score == 300:
-            score = score / 0.75
-        elif score == 1200:
-            score = score / 3
-
-        bumpiness = -sum([abs(self.game.heights[i] - self.game.heights[i + 1]) for i in range(len(self.game.heights) - 1)])
-
-        holes_after = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
-        hole_opening_reward = (holes_before - holes_after) * 10
-        
-        return self.get_state(), (score + self.height_low_reward + bumpiness + hole_opening_reward), False if self.game.state == "start" else True
+            return self.get_state(), (score*8 + self.height_low_reward + self.bumpiness + self.hole_opening_reward), False if self.game.state == "start" else True
     
     def get_state(self):
         if self.game.state == "start" and self.game.piece is None:
@@ -384,24 +386,6 @@ class Board():
         # return the state of the game
         return tuple(temp)
 
-    def calculate_unreachable_holes(self, field, height, width):
-        visited = [[False for _ in range(width)] for _ in range(height)]
-        holes = 0
-
-        for j in range(width):
-            # Start from the top and mark reachable spaces
-            for i in range(height):
-                if field[i][j] > 0:
-                    break
-                visited[i][j] = True
-            
-            # Count unreachable holes in the column
-            for i in range(height):
-                if not visited[i][j] and field[i][j] == 0:
-                    holes += 1
-
-        return holes
-    
     def render(self, snapshot=False):
         if self.game.state == "start" and self.game.piece is None:
             self.game.new_piece()
