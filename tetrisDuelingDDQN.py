@@ -1,5 +1,5 @@
-from DuelingAgent import Agent
-from selfmadetetrisAI import Board
+from DuelingDDQN import Agent
+from selfmadetetrisAI2 import Board
 import pygame
 from time import sleep
 
@@ -32,14 +32,14 @@ avg_x = []
 pause = False
 name_input = input("Enter the name of the model: ")
 lr = 0.001
-gamma = 0.97
+gamma = 0.96
 epsilon = 1
 input_dim = 18
 output_dim = 40
 samplesize = 500
 
-epsilon_min = 0.025
-epsilon_decay_factor = 1/(200_000)
+epsilon_min = 0.01
+epsilon_decay_factor = (1/(200_000))
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name

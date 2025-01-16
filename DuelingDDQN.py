@@ -59,6 +59,8 @@ class Agent():
         # initializes the neural network
         self.model = Model(input_dim, output_dim, lr=lr)
         self.weightPath = f"Models/{self.id}.pt"
+        self.target_model = Model(input_dim, output_dim, lr=lr)
+        self.sync_target_network()
 
         # tracks the agents current state, action, rewards, next state and terminal
         self.state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
@@ -67,7 +69,10 @@ class Agent():
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
         self.terminal_mem = np.zeros(self.batchMaxLength, dtype=bool)
 
-        # experience modulus thing
+        # target model update interval
+        self.target_update_interval = 1000
+
+        # the number of steps for each update
         self.step_update = 10
     
     # selects an action from the current state
@@ -78,11 +83,12 @@ class Agent():
             return random.randint(0, 39), False
         else:
             state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
-            with torch.no_grad():
+            # does not calculate gradients for the action, which is not needed
+            with torch.no_grad(): 
                 actions = self.model.forward(state)
             chosen_action = torch.argmax(actions).item()
             # Extracts q-values from the model for plotting
-            chosen_q_value = actions[0, chosen_action].item()
+            chosen_q_value = actions[0, chosen_action].item() 
             return chosen_action, chosen_q_value
     
     # stores the experience in the batch
@@ -96,61 +102,66 @@ class Agent():
 
         self.index += 1
     
+    # copies the weights of the model to the target model
+    def sync_target_network(self):
+        self.target_model.load_state_dict(self.model.state_dict())
+
     # learns from the experience
     def experience(self):
-
-        # checks if there are enough experiences in the memory
         if self.index < self.samplesize:
             return
-            
-        # How often the model is updated
+
         if self.index % self.step_update != 0:
             return
-        
+
         self.model.optimizer.zero_grad()
-        
-        # samples randomly 
+
+        # Sample random batch
         max_size = min(self.batchMaxLength, self.index)
         batch = np.random.choice(max_size, self.samplesize, replace=False)
 
         batch_index = np.arange(self.samplesize, dtype=np.int32)
 
-        # converts data to tensors
+        # Convert data to tensors
         state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
-
         action_batch = self.action_mem[batch]
-
         new_state_batch = torch.tensor(self.new_state_mem[batch]).to(self.model.device)
         reward_batch = torch.tensor(self.reward_mem[batch]).to(self.model.device)
         terminal_batch = torch.tensor(self.terminal_mem[batch], dtype=torch.bool).to(self.model.device)
 
-        # calculates target Q-values
+        # Compute Q-values for the selected actions
         q_values = self.model.forward(state_batch)[batch_index, action_batch]
-        q_values_next = self.model.forward(new_state_batch)
 
+        # Use the policy network to select the best actions
+        next_actions = torch.argmax(self.model.forward(new_state_batch), dim=1)
+
+        # Use the target network to evaluate the Q-value of the selected actions
+        q_values_next = self.target_model.forward(new_state_batch)[batch_index, next_actions]
         q_values_next[terminal_batch] = 0.0
 
-        # calculates predicted Q-values
-        q_reward = reward_batch + self.gamma * torch.max(q_values_next, dim=1)[0]
+        # Compute the target Q-values
+        q_target = reward_batch + self.gamma * q_values_next
 
-        # computes loss
-        loss_funtion = self.model.loss_function(q_reward, q_values).to(self.model.device)
-        
-        # backpropagates loss
-        loss_funtion.backward()
-        
-        # updates network weights using the optimizer
+        # Compute loss
+        loss = self.model.loss_function(q_target, q_values)
+
+        # Backpropagate loss
+        loss.backward()
         self.model.optimizer.step()
 
-        # return loss_funtion.item()
-        return loss_funtion.item()
+        # Periodically update the target network
+        if self.index % self.target_update_interval == 0:
+            self.sync_target_network()
+
+        return loss.item()
     
     def updateEpsilon(self):
         self.epsilon = self.epsilon - self.epsilon_decay_factor if self.epsilon > self.epsilon_min else self.epsilon_min
     
     def evaluate(self, state):
         state = torch.tensor([state], dtype=torch.float32).to(self.model.device)
-        with torch.no_grad():
+        # does not calculate gradients for the action, which is not needed
+        with torch.no_grad(): 
             actions = self.model.forward(state)
         return torch.argmax(actions).item()
 
