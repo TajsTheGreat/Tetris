@@ -36,15 +36,14 @@ class Model(torch.nn.Module):
 
 # the agent
 class Agent():
-    
-    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay_factor=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, n_networks=3, epsilon_decay_factor=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id
 
-        # creates replay memory
+        # Replay memory
         self.batchMaxLength = batchMaxLength
-        self.batch = deque(maxlen = self.batchMaxLength)
+        self.batch = deque(maxlen=self.batchMaxLength)
 
-        # defines parameters
+        # Parameters
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_decay_factor = epsilon_decay_factor
@@ -52,36 +51,31 @@ class Agent():
         self.lr = lr
         self.samplesize = samplesize
         self.index = 0
+        self.n_networks = n_networks
 
-        # initializes the neural network
-        self.model = Model(input_dim, output_dim, lr=lr)
-        self.weightPath = f"Models/{self.id}.pt"
+        # Initialize multiple Q-networks
+        self.models = [Model(input_dim, output_dim, lr=lr) for _ in range(self.n_networks)]
 
-        # tracks the agents current state, action, rewards, next state and terminal
+        # Memory buffers
         self.state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
         self.new_state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
         self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
         self.terminal_mem = np.zeros(self.batchMaxLength, dtype=bool)
 
-        # experience modulus thing
         self.step_update = 10
     
-    # selects an action from the current state
     def act(self, obs):    
-
-        # decides wether to prioritize exploration or exploitation
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 39)
         else:
-            state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
+            state = torch.tensor([obs], dtype=torch.float32).to(self.models[0].device)
             with torch.no_grad():
-                actions = self.model.forward(state)
-            chosen_action = torch.argmax(actions).item()
-            chosen_q_value = actions[0][chosen_action].item()
-            return chosen_action, chosen_q_value
-    
-    # stores the experience in the batch
+                actions = [model.forward(state) for model in self.models]
+                avg_actions = torch.mean(torch.stack(actions), dim=0)
+            chosen_action = torch.argmax(avg_actions).item()
+            return chosen_action
+
     def updateBatch(self, state, action, reward, new_state, done):
         i = self.index % self.batchMaxLength
         self.state_mem[i] = state
@@ -92,63 +86,49 @@ class Agent():
 
         self.index += 1
     
-    # learns from the experience
     def experience(self):
-
-        # checks if there are enough experiences in the memory
         if self.index < self.samplesize:
             return
-            
-        # How often the model is updated
         if self.index % self.step_update != 0:
             return
         
-        self.model.optimizer.zero_grad()
-        
-        # samples randomly 
         max_size = min(self.batchMaxLength, self.index)
         batch = np.random.choice(max_size, self.samplesize, replace=False)
-
         batch_index = np.arange(self.samplesize, dtype=np.int32)
 
-        # converts data to tensors
-        state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
-
+        state_batch = torch.tensor(self.state_mem[batch]).to(self.models[0].device)
         action_batch = self.action_mem[batch]
+        new_state_batch = torch.tensor(self.new_state_mem[batch]).to(self.models[0].device)
+        reward_batch = torch.tensor(self.reward_mem[batch]).to(self.models[0].device)
+        terminal_batch = torch.tensor(self.terminal_mem[batch], dtype=torch.bool).to(self.models[0].device)
 
-        new_state_batch = torch.tensor(self.new_state_mem[batch]).to(self.model.device)
-        reward_batch = torch.tensor(self.reward_mem[batch]).to(self.model.device)
-        terminal_batch = torch.tensor(self.terminal_mem[batch], dtype=torch.bool).to(self.model.device)
+        # Calculate Q-values
+        model_to_update = random.choice(self.models)
+        model_to_update.optimizer.zero_grad()
 
-        # calculates target Q-values
-        q_values = self.model.forward(state_batch)[batch_index, action_batch]
-        q_values_next = self.model.forward(new_state_batch)
-
-        q_values_next[terminal_batch] = 0.0
-
-        # calculates predicted Q-values
-        q_reward = reward_batch + self.gamma * torch.max(q_values_next, dim=1)[0]
-
-        # computes loss
-        loss_funtion = self.model.loss_function(q_reward, q_values).to(self.model.device)
+        q_values = model_to_update.forward(state_batch)[batch_index, action_batch]
         
-        # backpropagates loss
-        loss_funtion.backward()
-        
-        # updates network weights using the optimizer
-        self.model.optimizer.step()
+        # Compute min of Q-values from all models
+        q_values_next = torch.stack([model.forward(new_state_batch) for model in self.models])
+        q_values_next_min = torch.min(q_values_next, dim=0)[0]
+        q_values_next_min[terminal_batch] = 0.0
 
-        # return loss_funtion.item()
-        return loss_funtion.item()
-    
+        q_target = reward_batch + self.gamma * torch.max(q_values_next_min, dim=1)[0]
+
+        loss = model_to_update.loss_function(q_target, q_values)
+        loss.backward()
+        model_to_update.optimizer.step()
+        return loss.item()
+
     def updateEpsilon(self):
         self.epsilon = self.epsilon - self.epsilon_decay_factor if self.epsilon > self.epsilon_min else self.epsilon_min
-    
+
     def evaluate(self, state):
-        state = torch.tensor([state], dtype=torch.float32).to(self.model.device)
+        state = torch.tensor([state], dtype=torch.float32).to(self.models[0].device)
         with torch.no_grad():
-            actions = self.model.forward(state)
-        return torch.argmax(actions).item()
+            actions = [model.forward(state) for model in self.models]
+            avg_actions = torch.mean(torch.stack(actions), dim=0)
+        return torch.argmax(avg_actions).item()
 
     # this loads the weights of the model
     def loadWeights(self):

@@ -368,7 +368,7 @@ class Board():
 
         holes_after = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
         hole_opening_reward = (holes_before - holes_after) * 10
-        
+
         return self.get_state(), (score + self.height_low_reward + bumpiness + hole_opening_reward), False if self.game.state == "start" else True
     
     def get_state(self):
