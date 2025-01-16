@@ -7,7 +7,7 @@ import numpy as np
 from collections import deque
 
 # amount of neurons in each hidden layer
-H = 200
+H = 256
 
 # the neural network
 class Model(torch.nn.Module):
