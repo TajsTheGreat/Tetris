@@ -1,4 +1,4 @@
-from DuelingAgent import Agent
+from DuelingDQN import Agent
 from selfmadetetrisAI import Board
 import pygame
 from time import sleep
