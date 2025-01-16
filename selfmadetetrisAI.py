@@ -328,7 +328,7 @@ class Board():
                 min_height = self.game.heights[i]
 
         height_var = height_var / len(self.game.heights)
-        holes_before = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
+        
 
         # Place the piece
         firstvalue = int(str(value)[0]) if value > 9 else 0
@@ -341,7 +341,6 @@ class Board():
             height_total2 += self.game.heights[i]
 
         self.height_reward = 5 if height_total - height_total2 == -4 else (height_total - height_total2)
-
         self.height_low_reward = (min_height - self.game.lowest + 2) * 4
 
         score = self.game.score - score
@@ -355,9 +354,11 @@ class Board():
             score = score / 3
 
         bumpiness = -sum([abs(self.game.heights[i] - self.game.heights[i + 1]) for i in range(len(self.game.heights) - 1)])
-
-        holes_after = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
-        hole_opening_reward = (holes_before - holes_after) * 10
+       
+        if holes_before - holes_after == 0:
+            hole_opening_reward = 10
+        else:
+            hole_opening_reward = (holes_before - holes_after) * 10
         
         return self.get_state(), (score + self.height_low_reward + bumpiness + hole_opening_reward), False if self.game.state == "start" else True
     
@@ -372,7 +373,7 @@ class Board():
         temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
         # return the state of the game
         return tuple(temp)
-    
+      
     def render(self, snapshot=False):
         if self.game.state == "start" and self.game.piece is None:
             self.game.new_piece()
