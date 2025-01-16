@@ -347,6 +347,7 @@ class Board():
 
         self.height_reward = 5 if height_total - height_total2 == -4 else (height_total - height_total2)
         
+        holes_after = self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width)
 
         self.height_low_reward = (min_height - self.game.lowest + 2) * 4
 
