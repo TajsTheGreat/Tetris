@@ -361,19 +361,17 @@ class Board():
         elif score == 1200:
             score = score / 3
         
-        self.test_score = score*6
+        self.test_score = score*8
 
         self.bumpiness = -sum([abs(self.game.heights[i] - self.game.heights[i + 1]) for i in range(len(self.game.heights) - 1)])
        
         if holes_before - holes_after == 0:
             self.hole_opening_reward = 20
-        elif holes_before - holes_after > 0:
-            self.hole_opening_reward = (holes_before - holes_after) * 30
         else:
-            self.hole_opening_reward = (holes_before - holes_after) * 40
+            self.hole_opening_reward = (holes_before - holes_after) * 60
         
 
-        return self.get_state(), (score*6 + self.height_low_reward + self.bumpiness + self.hole_opening_reward), False if self.game.state == "start" else True
+        return self.get_state(), (score*8 + self.height_low_reward + self.bumpiness + self.hole_opening_reward), False if self.game.state == "start" else True
     
     def get_state(self):
         if self.game.state == "start" and self.game.piece is None:
