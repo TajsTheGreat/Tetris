@@ -153,7 +153,7 @@ while not exit_program:
         score_reward = 0
         move_reward = 0
         move_100_counter = 0
-        
+
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)

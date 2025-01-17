@@ -94,7 +94,6 @@ while not exit_program:
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action[0], reward, obs_, done)
 
-
         # Learns from the batch of experiences and updates the model
         result = theBrain.experience()
         if result is not None:

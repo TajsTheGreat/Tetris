@@ -35,7 +35,7 @@ class Model(torch.nn.Module):
         # The advantage of each action
         A = self.A(flat4)
 
-        return V + A - torch.max(A, dim=1, keepdim=True)
+        return V + A - torch.max(A, dim=1, keepdim=True)[0]
 
 # the agent
 class Agent():
