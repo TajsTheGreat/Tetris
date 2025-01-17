@@ -14,7 +14,8 @@ class Model(torch.nn.Module):
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, 256)
         self.fc4 = nn.Linear(256, 256)
-        self.fc5 = nn.Linear(256, output_dim)
+        self.A = nn.Linear(256, output_dim)
+        self.V = nn.Linear(256, 1)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -22,14 +23,19 @@ class Model(torch.nn.Module):
         self.loss_function = nn.MSELoss() # if not working add reduction='sum'
         self.to(self.device)
     
-    # Uses ReLU activation function to output raw Q-values
-    def forward(self, x):
-        x = F.leaky_relu(self.fc1(x))
-        x = F.leaky_relu(self.fc2(x))
-        x = F.leaky_relu(self.fc3(x))
-        x = F.leaky_relu(self.fc4(x))
-        x = self.fc5(x)
-        return x
+    def forward(self, state):
+        flat1 = F.relu(self.fc1(state))
+        flat2 = F.relu(self.fc2(flat1))
+        flat3 = F.relu(self.fc3(flat2))
+        flat4 = F.relu(self.fc4(flat3))
+
+        # The value of the state
+        V = self.V(flat4)
+
+        # The advantage of each action
+        A = self.A(flat4)
+
+        return V + A - torch.max(A, dim=1, keepdim=True)[0]
 
 # the agent
 class Agent():
@@ -53,8 +59,6 @@ class Agent():
         # initializes the neural network
         self.model = Model(input_dim, output_dim, lr=lr)
         self.weightPath = f"Models/{self.id}.pt"
-        self.target_model = Model(input_dim, output_dim, lr=lr)
-        self.sync_target_network()
 
         # tracks the agents current state, action, rewards, next state and terminal
         self.state_mem = np.zeros((self.batchMaxLength, *input_dim), dtype=np.float32)
@@ -63,25 +67,22 @@ class Agent():
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
         self.terminal_mem = np.zeros(self.batchMaxLength, dtype=bool)
 
-        # target model update interval
-        self.target_update_interval = 1000
-
-        # the number of steps for each update
+        # experience modulus thing
         self.step_update = 10
     
     # selects an action from the current state
     def act(self, obs):    
+
         # decides wether to prioritize exploration or exploitation
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 39), False
         else:
             state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
-            # does not calculate gradients for the action, which is not needed
-            with torch.no_grad(): 
+            with torch.no_grad():
                 actions = self.model.forward(state)
             chosen_action = torch.argmax(actions).item()
             # Extracts q-values from the model for plotting
-            chosen_q_value = actions[0, chosen_action].item() 
+            chosen_q_value = actions[0, chosen_action].item()
             return chosen_action, chosen_q_value
     
     # stores the experience in the batch
@@ -95,66 +96,61 @@ class Agent():
 
         self.index += 1
     
-    # copies the weights of the model to the target model
-    def sync_target_network(self):
-        self.target_model.load_state_dict(self.model.state_dict())
-
     # learns from the experience
     def experience(self):
+
+        # checks if there are enough experiences in the memory
         if self.index < self.samplesize:
             return
-
+            
+        # How often the model is updated
         if self.index % self.step_update != 0:
             return
-
+        
         self.model.optimizer.zero_grad()
-
-        # Sample random batch
+        
+        # samples randomly 
         max_size = min(self.batchMaxLength, self.index)
         batch = np.random.choice(max_size, self.samplesize, replace=False)
 
         batch_index = np.arange(self.samplesize, dtype=np.int32)
 
-        # Convert data to tensors
+        # converts data to tensors
         state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
+
         action_batch = self.action_mem[batch]
+
         new_state_batch = torch.tensor(self.new_state_mem[batch]).to(self.model.device)
         reward_batch = torch.tensor(self.reward_mem[batch]).to(self.model.device)
         terminal_batch = torch.tensor(self.terminal_mem[batch], dtype=torch.bool).to(self.model.device)
 
-        # Compute Q-values for the selected actions
+        # calculates target Q-values
         q_values = self.model.forward(state_batch)[batch_index, action_batch]
+        q_values_next = self.model.forward(new_state_batch)
 
-        # Use the policy network to select the best actions
-        next_actions = torch.argmax(self.model.forward(new_state_batch), dim=1)
-
-        # Use the target network to evaluate the Q-value of the selected actions
-        q_values_next = self.target_model.forward(new_state_batch)[batch_index, next_actions]
         q_values_next[terminal_batch] = 0.0
 
-        # Compute the target Q-values
-        q_target = reward_batch + self.gamma * q_values_next
+        # calculates predicted Q-values
+        q_reward = reward_batch + self.gamma * torch.max(q_values_next, dim=1)[0]
 
-        # Compute loss
-        loss = self.model.loss_function(q_target, q_values)
-
-        # Backpropagate loss
-        loss.backward()
+        # computes loss
+        loss_funtion = self.model.loss_function(q_reward, q_values).to(self.model.device)
+        
+        # backpropagates loss
+        loss_funtion.backward()
+        
+        # updates network weights using the optimizer
         self.model.optimizer.step()
 
-        # Periodically update the target network
-        if self.index % self.target_update_interval == 0:
-            self.sync_target_network()
-
-        return loss.item()
+        # return loss_funtion.item()
+        return loss_funtion.item()
     
     def updateEpsilon(self):
         self.epsilon = self.epsilon - self.epsilon_decay_factor if self.epsilon > self.epsilon_min else self.epsilon_min
     
     def evaluate(self, state):
         state = torch.tensor([state], dtype=torch.float32).to(self.model.device)
-        # does not calculate gradients for the action, which is not needed
-        with torch.no_grad(): 
+        with torch.no_grad():
             actions = self.model.forward(state)
         return torch.argmax(actions).item()
 

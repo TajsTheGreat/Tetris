@@ -14,7 +14,8 @@ class Model(torch.nn.Module):
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, 256)
         self.fc4 = nn.Linear(256, 256)
-        self.fc5 = nn.Linear(256, output_dim)
+        self.A = nn.Linear(256, output_dim)
+        self.V = nn.Linear(256, 1)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -22,14 +23,19 @@ class Model(torch.nn.Module):
         self.loss_function = nn.MSELoss() # if not working add reduction='sum'
         self.to(self.device)
     
-    # Uses ReLU activation function to output raw Q-values
-    def forward(self, x):
-        x = F.leaky_relu(self.fc1(x))
-        x = F.leaky_relu(self.fc2(x))
-        x = F.leaky_relu(self.fc3(x))
-        x = F.leaky_relu(self.fc4(x))
-        x = self.fc5(x)
-        return x
+    def forward(self, state):
+        flat1 = F.relu(self.fc1(state))
+        flat2 = F.relu(self.fc2(flat1))
+        flat3 = F.relu(self.fc3(flat2))
+        flat4 = F.relu(self.fc4(flat3))
+
+        # The value of the state
+        V = self.V(flat4)
+
+        # The advantage of each action
+        A = self.A(flat4)
+
+        return V + A - torch.max(A, dim=1, keepdim=True)[0]
 
 # the agent
 class Agent():
@@ -67,10 +73,11 @@ class Agent():
         self.target_update_interval = 1000
 
         # the number of steps for each update
-        self.step_update = 10
+        self.step_update = 50
     
     # selects an action from the current state
     def act(self, obs):    
+
         # decides wether to prioritize exploration or exploitation
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 39), False

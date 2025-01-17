@@ -1,5 +1,5 @@
-from agent import Agent
-from selfmadetetrisAI import Board
+from DuelingDDQN import Agent
+from selfmadetetrisAI2 import Board
 import pygame
 from time import sleep
 
@@ -30,17 +30,24 @@ avg_losses_x = []
 avg_x = []
 
 pause = False
-name_input = input("Enter the name of the model you want to load: ")
-lr = 0.001
-gamma = 0.95
+name_input = input("Enter the name of the model: ")
+lr = 0.0005
+gamma = 0.97
 epsilon = 1
-input_dim = 17
+input_dim = 18
 output_dim = 40
 samplesize = 500
 
-epsilon_min = 0.025
-epsilon_decay_factor = epsilon_min ** (1/10_000)
-batchMaxLength = 100_000
+epsilon_min = 0.01
+epsilon_decay_factor = (1/(400_000))
+batchMaxLength = 200_000
+
+height_reward_low = 0
+bumpiness_reward = 0
+hole_reward = 0
+score_reward = 0
+move_reward = 0
+move_100_counter = 0
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
@@ -48,7 +55,6 @@ name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim
 theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay_factor=epsilon_decay_factor, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
 
 output_file(f"Models/{name_input}_runtime_data.html")  # Save plot as an HTML file
-
 
 while not exit_program:
 
@@ -74,7 +80,7 @@ while not exit_program:
         # if done:
         #     reward = reward - (1000/(moves/20)) 
         reward = reward + moves
-
+        
         height_reward_low += env.height_low_reward
         bumpiness_reward += env.bumpiness
         hole_reward += env.hole_opening_reward
@@ -82,9 +88,9 @@ while not exit_program:
         move_reward += moves
         move_100_counter += 1
 
-
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action[0], reward, obs_, done)
+
 
         # Learns from the batch of experiences and updates the model
         result = theBrain.experience()
@@ -146,7 +152,6 @@ while not exit_program:
         score_reward = 0
         move_reward = 0
         move_100_counter = 0
-
 
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)

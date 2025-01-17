@@ -1,5 +1,5 @@
 from DoubleAgent import Agent
-from selfmadetetrisAI import Board
+from selfmadetetrisAI2 import Board
 import pygame
 from time import sleep
 
@@ -30,15 +30,17 @@ avg_losses_x = []
 avg_x = []
 
 pause = False
-name_input = input("Enter the name of the model you want to load: ")
+
+name_input = input("Enter the name of the model: ")
 lr = 0.0005
 gamma = 0.97
+
 epsilon = 1
-input_dim = 18
+input_dim = 20
 output_dim = 40
 samplesize = 500
 
-epsilon_min = 0.01
+epsilon_min = 0.025
 epsilon_decay_factor = (1/(200_000))
 batchMaxLength = 100_000
 
@@ -91,7 +93,6 @@ while not exit_program:
 
         # Updates the batch with the new experience
         theBrain.updateBatch(obs, action[0], reward, obs_, done)
-
 
         # Learns from the batch of experiences and updates the model
         result = theBrain.experience()
