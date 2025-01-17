@@ -71,7 +71,6 @@ class Agent():
     
     # selects an action from the current state
     def act(self, obs):    
-
         # decides wether to prioritize exploration or exploitation
         if random.uniform(0, 1) < self.epsilon:
             return random.randint(0, 39), False
