@@ -79,6 +79,8 @@ while not exit_program:
 
         # if done:
         #     reward = reward - (1000/(moves/20)) 
+
+        reward = reward + moves
         
         height_reward_low += env.height_low_reward
         bumpiness_reward += env.bumpiness
@@ -151,7 +153,7 @@ while not exit_program:
         score_reward = 0
         move_reward = 0
         move_100_counter = 0
-    
+
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)

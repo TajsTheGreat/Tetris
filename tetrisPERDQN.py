@@ -1,5 +1,5 @@
 from PERAgent import Agent
-from selfmadetetrisAI2 import Board
+from selfmadetetrisAI import Board
 import pygame
 from time import sleep
 
@@ -79,6 +79,7 @@ while not exit_program:
 
         # if done:
         #     reward = reward - (1000/(moves/20)) 
+        reward = reward + moves
         
         height_reward_low += env.height_low_reward
         bumpiness_reward += env.bumpiness
@@ -145,6 +146,13 @@ while not exit_program:
     if game_counter % 100 == 0:
         print(f"100 last games:{dict(sorted(dic_100.items()))}, game number: {game_counter}, batch index: {theBrain.index}, epsilon: {theBrain.epsilon}, avg moves: {avg_moves/100}")
         print(f"height reward low: {height_reward_low/move_100_counter}, bumpiness reward: {bumpiness_reward/move_100_counter}, hole reward: {hole_reward/move_100_counter}, score reward: {score_reward/move_100_counter}, move reward: {move_reward/move_100_counter}")
+        height_reward_low = 0
+        bumpiness_reward = 0
+        hole_reward = 0
+        score_reward = 0
+        move_reward = 0
+        move_100_counter = 0
+        
         avg_moves_y.append(avg_moves/100)
         avg_num_pos_games_y.append(num_pos_games)
         avg_x.append(game_counter / 100)
