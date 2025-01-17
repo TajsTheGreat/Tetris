@@ -31,7 +31,7 @@ avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model you want to load: ")
-lr = 0.001
+lr = 0.0005
 gamma = 0.97
 epsilon = 1
 input_dim = 18
