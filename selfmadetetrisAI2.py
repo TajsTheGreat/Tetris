@@ -65,6 +65,9 @@ class Tetris:
         self.height = height
         self.width = width
         self.heights = [0] * width
+
+        self.broken_lines = 0  # Tracks total cleared lines
+        self.moves_made = 0  # Tracks total moves made
     
         for i in range(height):
             new_line = []
@@ -115,6 +118,7 @@ class Tetris:
                     zeros += 1
             if zeros == 0:
                 lines += 1
+                self.broken_lines += 1  # Track total cleared lines
                 for k in range(i, 1, -1):
                     for j in range(self.width):
                         self.field[k][j] = self.field[k - 1][j]
@@ -188,6 +192,7 @@ class Tetris:
     # moves the piece to the desired location and rotates it
     def place(self, firstvalue, secondvalue):
         self.piece.specific_rotate(firstvalue)
+        self.moves_made += 1  # Track move
         while not (self.intersects() or self.piece.x == secondvalue):
             if 0 < (secondvalue - self.piece.x):
                 self.piece.x += 1
@@ -213,6 +218,9 @@ class Tetris:
         self.reserved_piece = None
     
         self.heights = [0] * self.width
+
+        self.broken_lines = 0  # Reset cleared lines
+        self.moves_made = 0  # Reset move count
     
         for i in range(self.height):
             new_line = []
@@ -312,6 +320,8 @@ class Board():
                 for i in range(7):
                     temp.append(0)
                 temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
+                temp.append(self.game.broken_lines)  # New: total lines cleared
+                temp.append(self.game.moves_made)  # New: total moves made
                 return tuple(temp), 0, True
             
 
@@ -367,6 +377,8 @@ class Board():
         
             if holes_before - holes_after == 0:
                 self.hole_opening_reward = 20
+            elif holes_before - holes_after > 0:
+                self.hole_opening_reward = (holes_before - holes_after) * 60
             else:
                 self.hole_opening_reward = (holes_before - holes_after) * 60
             
@@ -383,6 +395,8 @@ class Board():
         for i in range(7):
             temp.append(self.game.get_piece()[i])
         temp.append(self.calculate_unreachable_holes(self.game.field, self.game.height, self.game.width))
+        temp.append(self.game.broken_lines)  # New: total lines cleared
+        temp.append(self.game.moves_made)  # New: total moves made
         # return the state of the game
         return tuple(temp)
 

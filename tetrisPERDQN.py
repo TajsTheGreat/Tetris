@@ -1,5 +1,5 @@
 from PERAgent import Agent
-from selfmadetetrisAI2 import Board
+from selfmadetetrisAI import Board
 import pygame
 from time import sleep
 
