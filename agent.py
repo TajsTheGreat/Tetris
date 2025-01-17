@@ -6,18 +6,16 @@ import random
 import numpy as np
 from collections import deque
 
-# amount of neurons in each hidden layer
-H = 200
 
 # the neural network
 class Model(torch.nn.Module):
     def __init__(self, input_dim, output_dim, lr=0.01):
         super(Model, self).__init__()
-        self.fc1 = nn.Linear(*input_dim, H)
-        self.fc2 = nn.Linear(H, H)
-        self.fc3 = nn.Linear(H, H)
-        self.fc4 = nn.Linear(H, H)
-        self.fc5 = nn.Linear(H, output_dim)
+        self.fc1 = nn.Linear(*input_dim, 256)
+        self.fc2 = nn.Linear(256, 256)
+        self.fc3 = nn.Linear(256, 256)
+        self.fc4 = nn.Linear(256, 256)
+        self.fc5 = nn.Linear(256, output_dim)
 
         # Uses Adam for optimization
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -37,7 +35,7 @@ class Model(torch.nn.Module):
 # the agent
 class Agent():
     
-    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay_factor=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
         self.id = id
 
         # creates replay memory
@@ -47,7 +45,7 @@ class Agent():
         # defines parameters
         self.gamma = gamma
         self.epsilon = epsilon
-        self.epsilon_decay_factor = epsilon_decay_factor
+        self.epsilon_decay = epsilon_decay
         self.epsilon_min = epsilon_min
         self.lr = lr
         self.samplesize = samplesize
@@ -142,7 +140,7 @@ class Agent():
         return loss_funtion.item()
     
     def updateEpsilon(self):
-        self.epsilon = self.epsilon - self.epsilon_decay_factor if self.epsilon > self.epsilon_min else self.epsilon_min
+        self.epsilon = self.epsilon - self.epsilon_decay if self.epsilon > self.epsilon_min else self.epsilon_min
     
     def evaluate(self, state):
         state = torch.tensor([state], dtype=torch.float32).to(self.model.device)
