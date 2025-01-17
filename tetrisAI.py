@@ -31,21 +31,21 @@ avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model you want to load: ")
-lr = 0.001
-gamma = 0.95
+lr = 0.0005
+gamma = 0.97
 epsilon = 1
-input_dim = 17
+input_dim = 18
 output_dim = 40
 samplesize = 500
 
-epsilon_min = 0.025
-epsilon_decay_factor = epsilon_min ** (1/10_000)
+epsilon_min = 0.01
+epsilon_decay = 1/200_000
 batchMaxLength = 100_000
 
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
 
-theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay_factor=epsilon_decay_factor, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
+theBrain = Agent(name, gamma, epsilon, lr, [input_dim], output_dim, samplesize, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, batchMaxLength=batchMaxLength)
 
 output_file(f"Models/{name_input}_runtime_data.html")  # Save plot as an HTML file
 
