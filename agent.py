@@ -70,7 +70,7 @@ class Agent():
 
         # decides wether to prioritize exploration or exploitation
         if random.uniform(0, 1) < self.epsilon:
-            return random.randint(0, 39)
+            return random.randint(0, 39), False
         else:
             state = torch.tensor([obs], dtype=torch.float32).to(self.model.device)
             with torch.no_grad():

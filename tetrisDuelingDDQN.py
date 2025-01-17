@@ -5,12 +5,14 @@ from time import sleep
 
 from bokeh.plotting import figure, show, output_file, save
 from bokeh.layouts import row
+import pandas as pd
 
 env = Board()
 env.reset()
 exit_program = False
 env.render()
 game_counter = 0
+batch_counter = 0
 dic_20 = {}
 dic_100 = {}
 avg_moves = 0
@@ -28,6 +30,15 @@ avg_losses_y = []
 avg_q_values_y = []
 avg_losses_x = []
 avg_x = []
+
+experiment_avg_moves = 0
+experiment_num_pos_games = 0
+experiment_reward_value = 0
+
+experiment_avg_moves_y = []
+experiment_avg_num_pos_games_y = []
+experiment_avg_rewards_y = []
+experiment_avg_x = []
 
 pause = False
 name_input = input("Enter the name of the model: ")
@@ -60,6 +71,8 @@ while not exit_program:
 
     done = False
     moves = 0
+    experiment_avg_moves += 1
+    experiment_num_pos_games_subtract = 0
 
     while not done:
         
@@ -76,6 +89,7 @@ while not exit_program:
 
         # Increments the number of moves
         moves += 1
+        batch_counter += 1
 
         # if done:
         #     reward = reward - (1000/(moves/20)) 
@@ -98,6 +112,8 @@ while not exit_program:
             loss_value += result
         
         reward_value += reward
+        experiment_reward_value += reward
+
         if action[1] is not False:
             q_value_value += action[1]
 
@@ -121,12 +137,29 @@ while not exit_program:
         # updates the epsilon value
         theBrain.updateEpsilon()
 
+        if batch_counter % 2500 == 0:
+            if env.game.score > 0:
+                experiment_num_pos_games += moves
+            experiment_avg_moves_y.append(2500/experiment_avg_moves)
+            experiment_avg_num_pos_games_y.append(experiment_num_pos_games/2500)
+            experiment_avg_rewards_y.append(experiment_reward_value/2500)
+            experiment_avg_x.append(batch_counter / 2500)
+
+            experiment_avg_moves = 0
+            experiment_num_pos_games = 0
+            experiment_reward_value = 0
+            experiment_num_pos_games_subtract = moves
+
+            pd.DataFrame({"avg_moves": experiment_avg_moves_y, "num_pos_games": experiment_avg_num_pos_games_y, "reward": experiment_avg_rewards_y, "x": experiment_avg_x}).to_csv(f"Models/{name_input}_experiment_data.csv")
+
+
     # saves the moves made in the game
     avg_moves += moves
     score_value += env.game.score
 
     if env.game.score > 0:
         num_pos_games += 1
+        experiment_num_pos_games += moves - experiment_num_pos_games_subtract
     
     game_counter += 1
     if env.game.score not in dic_20:
