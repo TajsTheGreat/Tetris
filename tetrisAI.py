@@ -42,6 +42,13 @@ epsilon_min = 0.01
 epsilon_decay = 1/200_000
 batchMaxLength = 100_000
 
+height_reward_low = 0
+bumpiness_reward = 0
+hole_reward = 0
+score_reward = 0
+move_reward = 0
+move_100_counter = 0
+
 # needs to use _ instead of : in the name
 name = f"name_{name_input}, lr_{lr}, gamma_{gamma}, epsilon_{epsilon}, input_dim_{input_dim}, output_dim_{output_dim}, samplesize_{samplesize}, epsilon_min_{epsilon_min}, batchMaxLength_{batchMaxLength}"
 
