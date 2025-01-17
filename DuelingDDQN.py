@@ -35,7 +35,7 @@ class Model(torch.nn.Module):
         # The advantage of each action
         A = self.A(flat4)
 
-        return V + A - torch.max(A, dim=1, keepdim=True)
+        return V + A - torch.max(A, dim=1, keepdim=True)[0]
 
 # the agent
 class Agent():
@@ -73,7 +73,7 @@ class Agent():
         self.target_update_interval = 1000
 
         # the number of steps for each update
-        self.step_update = 10
+        self.step_update = 50
     
     # selects an action from the current state
     def act(self, obs):    
