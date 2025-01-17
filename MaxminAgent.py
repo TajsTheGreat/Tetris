@@ -144,6 +144,6 @@ class Agent():
     # this saves the weights of the model
     def saveWeights(self):
         torch.save({
-        'model_state_dict': self.model.state_dict(),
-        'optimizer_state_dict': self.model.optimizer.state_dict()
+        'model_state_dict': self.models.state_dict(),
+        'optimizer_state_dict': self.models.optimizer.state_dict()
         }, self.weightPath)
