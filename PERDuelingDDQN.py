@@ -35,12 +35,12 @@ class Model(torch.nn.Module):
         # The advantage of each action
         A = self.A(flat4)
 
-        return V + A - torch.max(A, dim=1, keepdim=True)
+        return V + A - torch.mean(A, dim=1, keepdim=True)
 
 # the agent
 class Agent():
     
-    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay_factor=5e-5, epsilon_min=0.01, batchMaxLength=100_000):
+    def __init__(self, id, gamma, epsilon, lr, input_dim, output_dim, samplesize, epsilon_decay_factor=5e-5, epsilon_min=0.01, batchMaxLength=100_000, alpha=0.6, beta_start=0.4, beta_increment=1e-4):
         self.id = id
 
         # creates replay memory
@@ -55,8 +55,12 @@ class Agent():
         self.lr = lr
         self.samplesize = samplesize
         self.index = 0
+        self.alpha = alpha
 
-        # initializes the neural network
+        self.beta = beta_start
+        self.beta_increment = beta_increment
+
+        # initializes the policy network and the target network
         self.model = Model(input_dim, output_dim, lr=lr)
         self.weightPath = f"Models/{self.id}.pt"
         self.target_model = Model(input_dim, output_dim, lr=lr)
@@ -68,6 +72,7 @@ class Agent():
         self.action_mem = np.zeros(self.batchMaxLength, dtype=np.int32)
         self.reward_mem = np.zeros(self.batchMaxLength, dtype=np.float32)
         self.terminal_mem = np.zeros(self.batchMaxLength, dtype=bool)
+        self.priorities = np.zeros((self.batchMaxLength,), dtype=np.float32)
 
         # target model update interval
         self.target_update_interval = 1000
@@ -94,11 +99,22 @@ class Agent():
     # stores the experience in the batch
     def updateBatch(self, state, action, reward, new_state, done):
         i = self.index % self.batchMaxLength
+        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        new_state_tensor = torch.tensor(new_state, dtype=torch.float32).unsqueeze(0)
+
+        # calculates the error (uses torch.no_grad() because speedy)
+        with torch.no_grad():
+            target = reward + self.gamma * torch.max(self.model(new_state_tensor)) * (1 - done)
+            current = self.model(state_tensor)[0, action]
+            error = abs(target - current).item()
+
+        # Add to memory
         self.state_mem[i] = state
         self.new_state_mem[i] = new_state
         self.action_mem[i] = action
         self.reward_mem[i] = reward
-        self.terminal_mem[i] = bool(done)
+        self.terminal_mem[i] = done
+        self.priorities[i] = (error + 1e-5) ** self.alpha
 
         self.index += 1
     
@@ -116,34 +132,50 @@ class Agent():
 
         self.model.optimizer.zero_grad()
 
-        # Sample random batch
-        max_size = min(self.batchMaxLength, self.index)
-        batch = np.random.choice(max_size, self.samplesize, replace=False)
+        # Sample from buffer with the priorities
+        if self.index >= self.batchMaxLength:
+            priorities = self.priorities
+        else:
+            priorities = self.priorities[:self.index]
+        
+        probabilities = priorities / priorities.sum()
+        indices = np.random.choice(self.index if self.index <= self.batchMaxLength else self.batchMaxLength, self.samplesize, p=probabilities)
 
-        batch_index = np.arange(self.samplesize, dtype=np.int32)
+        weights = (self.index * probabilities[indices]) ** (-self.beta)
+        weights /= weights.max()
 
-        # Convert data to tensors
-        state_batch = torch.tensor(self.state_mem[batch]).to(self.model.device)
-        action_batch = self.action_mem[batch]
-        new_state_batch = torch.tensor(self.new_state_mem[batch]).to(self.model.device)
-        reward_batch = torch.tensor(self.reward_mem[batch]).to(self.model.device)
-        terminal_batch = torch.tensor(self.terminal_mem[batch], dtype=torch.bool).to(self.model.device)
+        states = self.state_mem[indices]
+        next_states = self.new_state_mem[indices]
+        actions = self.action_mem[indices]
+        rewards = self.reward_mem[indices]
+        terminal = self.terminal_mem[indices]
+
+        # Saves the data in a way pytorch can understand
+        states = torch.tensor(states, dtype=torch.float32).to(self.model.device)
+        next_states = torch.tensor(next_states, dtype=torch.float32).to(self.model.device)
+        actions = torch.tensor(actions, dtype=torch.long).to(self.model.device)
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(self.model.device)
+        terminal = torch.tensor(terminal, dtype=torch.bool).to(self.model.device)
+        weights = torch.tensor(weights, dtype=torch.float32).to(self.model.device)
 
         # Compute Q-values for the selected actions
-        q_values = self.model.forward(state_batch)[batch_index, action_batch]
+        q_values = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)
 
-        # Use the policy network to select the best actions
-        next_actions = torch.argmax(self.model.forward(new_state_batch), dim=1)
-
-        # Use the target network to evaluate the Q-value of the selected actions
-        q_values_next = self.target_model.forward(new_state_batch)[batch_index, next_actions]
-        q_values_next[terminal_batch] = 0.0
+        # For the DDQN update
+        next_actions = self.model(next_states).argmax(1)
+        q_values_next = self.target_model(next_states).gather(1, next_actions.unsqueeze(1)).squeeze(1)
+        q_values_next[terminal] = 0.0
 
         # Compute the target Q-values
-        q_target = reward_batch + self.gamma * q_values_next
+        q_target = rewards + self.gamma * q_values_next
 
-        # Compute loss
-        loss = self.model.loss_function(q_target, q_values)
+        # Calculate loss
+        errors = q_target - q_values
+        loss = (weights * errors.pow(2)).mean()
+
+        # Update priorities and beta
+        self.update_priorities(indices, (abs(errors) + 1e-5).detach().cpu().numpy())
+        self.beta = min(1.0, self.beta + self.beta_increment)
 
         # Backpropagate loss
         loss.backward()
@@ -164,6 +196,10 @@ class Agent():
         with torch.no_grad(): 
             actions = self.model.forward(state)
         return torch.argmax(actions).item()
+    
+    def update_priorities(self, batch_indices, errors):
+        for idx, error in zip(batch_indices, errors):
+            self.priorities[idx] = (abs(error) + 1e-5) ** self.alpha
 
     # this loads the weights of the model
     def loadWeights(self):
