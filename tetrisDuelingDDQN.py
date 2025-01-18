@@ -151,7 +151,9 @@ while not exit_program:
             experiment_num_pos_games_subtract = moves
 
             pd.DataFrame({"avg_moves": experiment_avg_moves_y, "num_pos_games": experiment_avg_num_pos_games_y, "reward": experiment_avg_rewards_y, "x": experiment_avg_x}).to_csv(f"Models/{name_input}_experiment_data.csv")
-
+            if batch_counter >= 2_000_000:
+                exit_program = True
+                done = True
 
     # saves the moves made in the game
     avg_moves += moves
