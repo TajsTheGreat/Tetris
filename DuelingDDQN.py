@@ -73,7 +73,7 @@ class Agent():
         self.target_update_interval = 1000
 
         # the number of steps for each update
-        self.step_update = 50
+        self.step_update = 10
     
     # selects an action from the current state
     def act(self, obs):    
