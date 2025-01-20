@@ -50,8 +50,8 @@ output_dim = 40
 samplesize = 500
 
 epsilon_min = 0.01
-epsilon_decay_factor = (1/(400_000))
-batchMaxLength = 200_000
+epsilon_decay_factor = (1/(200_000))
+batchMaxLength = 100_000
 
 height_reward_low = 0
 bumpiness_reward = 0
