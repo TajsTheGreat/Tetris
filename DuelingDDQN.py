@@ -24,10 +24,10 @@ class Model(torch.nn.Module):
         self.to(self.device)
     
     def forward(self, state):
-        flat1 = F.relu(self.fc1(state))
-        flat2 = F.relu(self.fc2(flat1))
-        flat3 = F.relu(self.fc3(flat2))
-        flat4 = F.relu(self.fc4(flat3))
+        flat1 = F.leaky_relu(self.fc1(state))
+        flat2 = F.leaky_relu(self.fc2(flat1))
+        flat3 = F.leaky_relu(self.fc3(flat2))
+        flat4 = F.leaky_relu(self.fc4(flat3))
 
         # The value of the state
         V = self.V(flat4)

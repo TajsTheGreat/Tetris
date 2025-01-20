@@ -1,5 +1,5 @@
 from agent import Agent
-from selfmadetetrisAI import Board
+from selfmadetetrisAI3 import Board
 import pygame
 from time import sleep
 

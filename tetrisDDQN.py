@@ -39,12 +39,11 @@ experiment_avg_moves_y = []
 experiment_avg_num_pos_games_y = []
 experiment_avg_rewards_y = []
 experiment_avg_x = []
-pause = False
 
+pause = False
 name_input = input("Enter the name of the model: ")
 lr = 0.0005
 gamma = 0.97
-
 epsilon = 1
 input_dim = 18
 output_dim = 40
