@@ -1,5 +1,5 @@
 from DuelingDDQN import Agent
-from selfmadetetrisAI2 import Board
+from selfmadetetrisAI3 import Board
 import pygame
 from time import sleep
 
