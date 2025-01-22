@@ -1,5 +1,5 @@
-from agent import Agent
-from selfmadetetrisAI import Board
+from DoubleAgent import Agent
+from selfmadetetrisAI3 import Board
 import pygame
 import glob
 
@@ -50,6 +50,8 @@ theBrain.loadWeights()
 output_file(f"Models/{name_input}_runtime_eval_data.html")  # Save plot as an HTML file
 
 snapshot = False
+render = False
+pause = False
 
 while not exit_program:
 
@@ -67,6 +69,12 @@ while not exit_program:
         # Takes the action and observes the new state, reward, and whether the game is done
         obs_, reward, done = env.step(action)
 
+        if render:
+            env.render()
+        
+        if pause:
+            pygame.time.wait(100)
+
         # Increments the number of moves
         moves += 1
         
@@ -83,6 +91,8 @@ while not exit_program:
                     pause = not pause
                 if event.key == pygame.K_r:
                     snapshot = True
+                if event.key == pygame.K_t:
+                    render = not render
 
     # saves the moves made in the game
     avg_moves += moves
