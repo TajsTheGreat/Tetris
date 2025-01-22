@@ -152,8 +152,8 @@ while not exit_program:
             experiment_reward_value = 0
             experiment_num_pos_games_subtract = moves
 
-            pd.DataFrame({"avg_moves": experiment_avg_moves_y, "num_pos_games": experiment_avg_num_pos_games_y, "reward": experiment_avg_rewards_y, "x": experiment_avg_x}).to_csv(f"Models/{name_input}_experiment_data.csv")
-            if batch_counter >= 2_000_000:
+            if batch_counter >= 2_500_000:
+                pd.DataFrame({"avg_moves": experiment_avg_moves_y, "num_pos_games": experiment_avg_num_pos_games_y, "reward": experiment_avg_rewards_y, "x": experiment_avg_x}).to_csv(f"Models/{name_input}_experiment_data.csv")
                 exit_program = True
                 done = True
 
@@ -235,22 +235,21 @@ while not exit_program:
         q_value_value = 0
         dic_100 = {}
         
-    
-    if game_counter % 500 == 0:
-        for i in range(100):
-            env.reset()
-            done = False
-            while not done:
-                env.render()
-                obs = env.get_state()
-                action = theBrain.evaluate(obs)
-                obs_, reward, done = env.step(action)
-            if env.game.score not in dic_100:
-                dic_100[env.game.score] = 1
-            else:
-                dic_100[env.game.score] += 1
-        print(f"100 evaluated games:{dict(sorted(dic_100.items()))}")
-        dic_100 = {}
+    # if game_counter % 500 == 0:
+    #     for i in range(100):
+    #         env.reset()
+    #         done = False
+    #         while not done:
+    #             env.render()
+    #             obs = env.get_state()
+    #             action = theBrain.evaluate(obs)
+    #             obs_, reward, done = env.step(action)
+    #         if env.game.score not in dic_100:
+    #             dic_100[env.game.score] = 1
+    #         else:
+    #             dic_100[env.game.score] += 1
+    #     print(f"100 evaluated games:{dict(sorted(dic_100.items()))}")
+    #     dic_100 = {}
 
 
     env.reset()
