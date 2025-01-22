@@ -1,4 +1,4 @@
-from DuelingDQN import Agent
+from DuelingDDQN import Agent
 from selfmadetetrisAI3 import Board
 import pygame
 import glob
