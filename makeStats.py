@@ -51,3 +51,17 @@ with open("Models/name_PeterDQNFINALDATA, lr_0.0005, gamma_0.97, epsilon_1, inpu
 print((sum(statlad2.score))/len(statlad2.score))
 print((sum(statlad2.avg_moves))/len(statlad2.avg_moves))
 print((sum(statlad2.num_positivs))/len(statlad2.num_positivs))
+
+with open("Models/name_PeterDUELINGDQNFINALDATA2, lr_0.0005, gamma_0.97, epsilon_1, input_dim_18, output_dim_40, samplesize_500, epsilon_min_0.01, batchMaxLength_100000_score_data.csv") as f:
+    statlad3 = pd.read_csv(f)
+
+print((sum(statlad3.score))/len(statlad3.score))
+print((sum(statlad3.avg_moves))/len(statlad3.avg_moves))
+print((sum(statlad3.num_positivs))/len(statlad3.num_positivs))
+
+with open("Models/name_DDDQNtest3, lr_0.0005, gamma_0.97, epsilon_1, input_dim_18, output_dim_40, samplesize_500, epsilon_min_0.01, batchMaxLength_100000_score_data.csv") as f:
+    statlad4 = pd.read_csv(f)
+
+print((sum(statlad4.score))/len(statlad4.score))
+print((sum(statlad4.avg_moves))/len(statlad4.avg_moves))
+print((sum(statlad4.num_positivs))/len(statlad4.num_positivs))
