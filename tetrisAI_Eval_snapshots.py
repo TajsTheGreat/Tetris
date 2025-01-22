@@ -5,6 +5,7 @@ import glob
 
 from bokeh.plotting import figure, show, output_file, save
 from bokeh.layouts import row
+import pandas as pd
 
 env = Board()
 env.reset()
@@ -18,6 +19,19 @@ num_pos_games = 0
 avg_moves_y = []
 avg_num_pos_games_y = []
 avg_x = []
+score = []
+
+# with open("Models/PeterDQNFINALDATA_experiment_data.csv") as f:
+#     DQN = pd.read_csv(f)
+
+# with open("Models/PeterDDQNFINALDATA_experiment_data.csv") as f:
+#     DDQN = pd.read_csv(f)
+
+# with open("Models/PeterDUELINGDQNFINALDATA2_experiment_data.csv") as f:
+#     DUELINGDQN = pd.read_csv(f)
+
+# with open("Models/DDDQNtest3_experiment_data.csv") as f:
+#     DDDQN = pd.read_csv(f)
 
 name_input = input("Enter the name of the model you want to load: ")
 
@@ -124,7 +138,11 @@ while not exit_program:
     
     if game_counter > 10_000:
         exit_program = True
+    
+    score.append(env.game.score)
 
     env.reset()
 
 env.close()
+
+pd.DataFrame({"score": score, "avg_moves": avg_moves_y, "num_positivs": avg_num_pos_games_y}).to_csv(f"Models/{name}_score_data.csv")

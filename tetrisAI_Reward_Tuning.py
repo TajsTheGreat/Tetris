@@ -1,4 +1,3 @@
-# File is used to tune the reward function of the tetris AI 
 from agent import Agent
 from selfmadetetrisAI import Board
 import pygame
