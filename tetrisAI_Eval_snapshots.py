@@ -1,4 +1,4 @@
-from DoubleAgent import Agent
+from DuelingDQN import Agent
 from selfmadetetrisAI3 import Board
 import pygame
 import glob
@@ -20,6 +20,9 @@ avg_moves_y = []
 avg_num_pos_games_y = []
 avg_x = []
 score = []
+
+avg_moves_y2 = []
+avg_num_pos_games_y2 = []
 
 # with open("Models/PeterDQNFINALDATA_experiment_data.csv") as f:
 #     DQN = pd.read_csv(f)
@@ -113,6 +116,9 @@ while not exit_program:
 
     if env.game.score > 0:
         num_pos_games += 1
+        avg_num_pos_games_y2.append(1)
+    else:
+        avg_num_pos_games_y2.append(0)
     
     game_counter += 1
 
@@ -150,6 +156,7 @@ while not exit_program:
         exit_program = True
     
     score.append(env.game.score)
+    avg_moves_y2.append(moves)
 
     env.reset()
 
