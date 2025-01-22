@@ -162,4 +162,4 @@ while not exit_program:
 
 env.close()
 
-pd.DataFrame({"score": score, "avg_moves": avg_moves_y, "num_positivs": avg_num_pos_games_y}).to_csv(f"Models/{name}_score_data.csv")
+pd.DataFrame({"score": score, "avg_moves": avg_moves_y2, "num_positivs": avg_num_pos_games_y2}).to_csv(f"Models/{name}_score_data.csv")
