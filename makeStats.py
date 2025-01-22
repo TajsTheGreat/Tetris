@@ -38,3 +38,16 @@ p3.line(DDDQN['x'], DDDQN['reward'], line_width=1.5, legend_label="Dueling DDQN"
 p3.legend.location = "top_left"
 
 save(row(p, p2, p3))
+
+with open("Models/name_PeterDDQNFINALDATA, lr_0.0005, gamma_0.97, epsilon_1, input_dim_18, output_dim_40, samplesize_500, epsilon_min_0.01, batchMaxLength_100000_score_data.csv") as f:
+    statlad = pd.read_csv(f)
+print((sum(statlad.score))/len(statlad.score))
+print((sum(statlad.avg_moves))/len(statlad.avg_moves))
+print((sum(statlad.num_positivs))/len(statlad.num_positivs))
+
+with open("Models/name_PeterDQNFINALDATA, lr_0.0005, gamma_0.97, epsilon_1, input_dim_18, output_dim_40, samplesize_500, epsilon_min_0.01, batchMaxLength_100000_score_data.csv") as f:
+    statlad2 = pd.read_csv(f)
+
+print((sum(statlad2.score))/len(statlad2.score))
+print((sum(statlad2.avg_moves))/len(statlad2.avg_moves))
+print((sum(statlad2.num_positivs))/len(statlad2.num_positivs))
