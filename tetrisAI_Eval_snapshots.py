@@ -1,5 +1,5 @@
 # This import statement must be changed to the agent you want to evaluate
-from DuelingDQN import Agent
+from DuelingDDQN import Agent
 
 from selfmadetetrisAI3 import Board
 import pygame

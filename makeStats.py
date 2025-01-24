@@ -18,21 +18,21 @@ with open("Models/DDDQNtest3_experiment_data.csv") as f:
 
 output_file("Models/Stats.html")
 
-p = figure(title="Average number of positive games for every 2500 moves", x_axis_label='Datapoint for every 2500 moves', y_axis_label='Precentage of positive games', height=400)
+p = figure(title="Average number of positive games for every 2500 moves", x_axis_label='Datapoint for every 2500 moves', y_axis_label='Precentage of positive games', height=300)
 p.line(DQN['x'], DQN['num_pos_games'], line_width=1.5, legend_label="DQN", color="blue")
 p.line(DDQN['x'], DDQN['num_pos_games'], line_width=1.5, legend_label="DDQN", color="red")
 p.line(DUELINGDQN['x'], DUELINGDQN['num_pos_games'], line_width=1.5, legend_label="Dueling DQN", color="green")
 p.line(DDDQN['x'], DDDQN['num_pos_games'], line_width=1.5, legend_label="Dueling DDQN", color="orange")
 p.legend.location = "bottom_right"
 
-p2 = figure(title="Average number of moves per game for every 2500 games", x_axis_label='Datapoint for every 2500 moves', y_axis_label='Number of moves on average', height=400)
+p2 = figure(title="Average number of moves per game for every 2500 games", x_axis_label='Datapoint for every 2500 moves', y_axis_label='Number of moves on average', height=300)
 p2.line(DQN['x'], DQN['avg_moves'], line_width=1.5, legend_label="DQN", color="blue")
 p2.line(DDQN['x'], DDQN['avg_moves'], line_width=1.5, legend_label="DDQN", color="red")
 p2.line(DUELINGDQN['x'], DUELINGDQN['avg_moves'], line_width=1.5, legend_label="Dueling DQN", color="green")
 p2.line(DDDQN['x'], DDDQN['avg_moves'], line_width=1.5, legend_label="Dueling DDQN", color="orange")
 p2.legend.location = "top_left"
 
-p3 = figure(title="Average reward per move for every 2500 moves", x_axis_label='Datapoint for every 2500 moves', y_axis_label='Average reward per move', height=400)
+p3 = figure(title="Average reward per move for every 2500 moves", x_axis_label='Datapoint for every 2500 moves', y_axis_label='Average reward per move', height=300)
 p3.line(DQN['x'], DQN['reward'], line_width=1.5, legend_label="DQN", color="blue")
 p3.line(DDQN['x'], DDQN['reward'], line_width=1.5, legend_label="DDQN", color="red")
 p3.line(DUELINGDQN['x'], DUELINGDQN['reward'], line_width=1.5, legend_label="Dueling DQN", color="green")
@@ -100,8 +100,6 @@ print("Confidence interval for statlad.score:", confidence_interval)
 # print((sum(statlad4.avg_moves))/len(statlad4.avg_moves))
 # print((sum(statlad4.num_positivs))/len(statlad4.num_positivs))
 
-print(statlad.columns)
-
 print((sum(statlad.reward))/len(statlad.reward))
 print((np.var(statlad.reward)))
 print((np.std(statlad.reward)))
@@ -141,3 +139,5 @@ sample_mean = np.mean(statlad4.reward)
 sample_standard_error = stats.sem(statlad4.reward)
 confidence_interval = stats.t.interval(confidence_level, degrees_freedom, sample_mean, sample_standard_error)
 print("Confidence interval for statlad.reward:", confidence_interval)
+
+print(f"avg moves dqn:{sum(statlad2.avg_moves)/len(statlad2.avg_moves)}, avg moves dueling dqn:{sum(statlad3.avg_moves)/len(statlad3.avg_moves)}")
