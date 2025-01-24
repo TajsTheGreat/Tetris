@@ -18,6 +18,7 @@ num_pos_games = 0
 
 avg_moves_y = []
 avg_num_pos_games_y = []
+reward_y = []
 avg_x = []
 score = []
 
@@ -74,6 +75,7 @@ while not exit_program:
 
     done = False
     moves = 0
+    total_reward = 0
 
     while not done:
 
@@ -85,6 +87,8 @@ while not exit_program:
 
         # Takes the action and observes the new state, reward, and whether the game is done
         obs_, reward, done = env.step(action)
+
+        total_reward += reward
 
         if render:
             env.render()
@@ -157,9 +161,10 @@ while not exit_program:
     
     score.append(env.game.score)
     avg_moves_y2.append(moves)
+    reward_y.append(total_reward)
 
     env.reset()
 
 env.close()
 
-pd.DataFrame({"score": score, "avg_moves": avg_moves_y2, "num_positivs": avg_num_pos_games_y2}).to_csv(f"Models/{name}_score_data.csv")
+pd.DataFrame({"score": score, "avg_moves": avg_moves_y2, "num_positivs": avg_num_pos_games_y2, "reward": reward_y}).to_csv(f"Models/{name}_score_data.csv")

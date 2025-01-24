@@ -12,3 +12,5 @@ selfmadetetrisAI3.py is the final one and the one we evaluated to be most optima
 tetrisAI_Eval_snapshots.py is a file that tests the final product of the trained DQN's and records there scores,
 average moves and number of positive games. This file is used to collect data for our report. 
 makeStats.py is used to make graphs of the data of the 4 different DQN's training progress.
+
+When training an DQN its training data is saved in a html file, with the name of your DQN.
