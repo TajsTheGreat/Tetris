@@ -99,3 +99,45 @@ confidence_interval = stats.t.interval(confidence_level, degrees_freedom, sample
 print("Confidence interval for statlad.score:", confidence_interval)
 # print((sum(statlad4.avg_moves))/len(statlad4.avg_moves))
 # print((sum(statlad4.num_positivs))/len(statlad4.num_positivs))
+
+print(statlad.columns)
+
+print((sum(statlad.reward))/len(statlad.reward))
+print((np.var(statlad.reward)))
+print((np.std(statlad.reward)))
+confidence_level = 0.95
+degrees_freedom = len(statlad.reward) - 1
+sample_mean = np.mean(statlad.reward)
+sample_standard_error = stats.sem(statlad.reward)
+confidence_interval = stats.t.interval(confidence_level, degrees_freedom, sample_mean, sample_standard_error)
+print("Confidence interval for statlad.reward:", confidence_interval)
+
+print((sum(statlad2.reward))/len(statlad2.reward))
+print((np.var(statlad2.reward)))
+print((np.std(statlad2.reward)))
+confidence_level = 0.95
+degrees_freedom = len(statlad2.reward) - 1
+sample_mean = np.mean(statlad2.reward)
+sample_standard_error = stats.sem(statlad2.reward)
+confidence_interval = stats.t.interval(confidence_level, degrees_freedom, sample_mean, sample_standard_error)
+print("Confidence interval for statlad.reward:", confidence_interval)
+
+print((sum(statlad3.reward))/len(statlad3.reward))
+print((np.var(statlad3.reward)))
+print((np.std(statlad3.reward)))
+confidence_level = 0.95
+degrees_freedom = len(statlad3.reward) - 1
+sample_mean = np.mean(statlad3.reward)
+sample_standard_error = stats.sem(statlad3.reward)
+confidence_interval = stats.t.interval(confidence_level, degrees_freedom, sample_mean, sample_standard_error)
+print("Confidence interval for statlad.reward:", confidence_interval)
+
+print((sum(statlad4.reward))/len(statlad4.reward))
+print((np.var(statlad4.reward)))
+print((np.std(statlad4.reward)))
+confidence_level = 0.95
+degrees_freedom = len(statlad4.reward) - 1
+sample_mean = np.mean(statlad4.reward)
+sample_standard_error = stats.sem(statlad4.reward)
+confidence_interval = stats.t.interval(confidence_level, degrees_freedom, sample_mean, sample_standard_error)
+print("Confidence interval for statlad.reward:", confidence_interval)
